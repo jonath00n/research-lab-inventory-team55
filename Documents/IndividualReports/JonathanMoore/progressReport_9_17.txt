@@ -1,0 +1,3 @@
+Added authentication for sign-in and registration for users.
+Struggled with input verification, but currently works.
+Focusing on creating an account page.
