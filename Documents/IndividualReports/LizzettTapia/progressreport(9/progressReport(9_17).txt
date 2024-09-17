@@ -1,0 +1,17 @@
+We had decided that we were going to be working with a non-SQL database, and from there narrowed it down to working 
+with MongoDB. After getting familiarized with how it works, I attempted to install it on my latop, but kept on running 
+into various issues. I discussed these issues with our TA Shima.
+
+After that, as a group, we decided to work with an SQL database. After doing some research, I decided to work with MySQL 
+and familiarize myself with it. Again, I ran into issues.
+I also began thinking about the server, as one is needed to connect with the database.
+
+Currently having issues with MySQL and figuring out how to connect to the server. 
+    I went to a CSCE Peer Teacher and he gave me two options to work with: 
+        SQLite (which just runs locally, and i can use that for practice in the meantime, while the server gets figured out)
+        PostgreSQL (but in order to create database and input info, i need a working server hosted at tamu.)
+We emailed Professor Lusher, as he had talked about the server with one of my teammates. 
+
+for next week:
+    work with SQLlite, so that way it works locally on my end. Or any other database that can help me showcase the information that we will be working with
+    (so i have something to testbench with) 
