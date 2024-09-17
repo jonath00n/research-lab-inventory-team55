@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="dashboard">
+        <div class="logo">
+            <img src="images/texas-am-university-logo-black-and-white.png" alt="Logo">
+        </div>
+        <div class="center-image">
+            <a href="index.html">
+                <img src="images/green-logo.png" alt="Center Image">
+            </a>            
+        </div>
+        <nav class="navigation">
+            <ul>
+                <li><a href="register.html">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="sign-in-container">
+        <h2>Sign In</h2>
+        <form id="sign-in-form">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="sign-in-button">Sign In</button>
+        </form>
+        <p class="sign-in-footer">Don't have an account? <a href="register.html">Register here</a>.</p>
+    </section>
+
+    <script>
+        document.getElementById('sign-in-form').addEventListener('submit', async function (event) {
+            event.preventDefault(); 
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Check if input fields are empty
+            if (!email || !password) {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            // Send a request to check if the user exists and validate password
+            const response = await fetch('/sign-in', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email, password: password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.valid) {
+                document.getElementById('sign-in-form').reset(); 
+                window.location.href = 'index.html'; 
+            } else {
+                alert('Invalid email or password.');
+                document.getElementById('sign-in-form').reset();
+            }
+        });
+    </script>
+</body>
+</html>
+
+<style>
+    @font-face {
+        font-family: 'Nasalization';
+        src: url('fonts/nasalization-rg.otf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    @font-face {
+        font-family: 'Roboto';
+        src: url('fonts/Roboto-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: white;
+    }
+
+    header.dashboard {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: rgb(255, 255, 255);
+        color: black;
+        position: relative;        
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    header.dashboard .logo img {
+        width: 90px;
+        height: 75px;
+    }
+
+    header.dashboard .center-image {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    header.dashboard .center-image img {
+        width: 80px;
+        height: auto;
+    }
+
+    header.dashboard .navigation ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+    }
+
+    header.dashboard .navigation ul li {
+        margin-left: 20px;
+    }
+
+    header.dashboard .navigation ul li a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: 'Roboto', sans-serif;
+        padding: 10px 20px;
+        border: 2px solid black;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    header.dashboard .navigation ul li a:hover {
+        background-color: black;
+        color: white;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    section.sign-in-container {
+        width: 30%;
+        margin: 100px auto;
+        padding: 40px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    section.sign-in-container h2 {
+        font-family: 'Nasalization', sans-serif;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    section.sign-in-container .input-group {
+        margin-bottom: 20px;
+    }
+
+    section.sign-in-container .input-group label {
+        display: block;
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        margin-bottom: 8px;
+        padding-left: 45px;
+        text-align: left;
+    }
+
+    section.sign-in-container .input-group input {
+        width: 75%;
+        padding: 10px;
+        font-size: 16px;
+        font-family: 'Roboto', sans-serif;
+        border: 2px solid black;
+        border-radius: 5px;
+    }
+
+    section.sign-in-container .sign-in-button {
+        width: 45%;
+        padding: 10px;
+        font-size: 16px;
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold;
+        color: white;
+        background-color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    section.sign-in-container .sign-in-button:hover {
+        background-color: gray;
+    }
+
+    section.sign-in-container .sign-in-footer {
+        margin-top: 20px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+    }
+
+    section.sign-in-container .sign-in-footer a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s;
+    }
+
+    section.sign-in-container .sign-in-footer a:hover {
+        color: gray;
+    }
+</style>

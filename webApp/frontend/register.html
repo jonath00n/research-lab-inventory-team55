@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="dashboard">
+        <div class="logo">
+            <img src="images/texas-am-university-logo-black-and-white.png" alt="Logo">
+        </div>
+        <div class="center-image">
+            <a href="index.html">
+                <img src="images/green-logo.png" alt="Center Image">
+            </a>            
+        </div>
+        <nav class="navigation">
+            <ul>
+                <li><a href="sign-in.html">Sign In</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="register-container">
+        <h2>Register</h2>
+        <form id="register-form">
+            <div class="input-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" name="fullname" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+            <button type="submit" class="register-button">Register</button>
+        </form>
+        <p class="register-footer">Already have an account? <a href="sign-in.html">Sign in here</a>.</p>
+    </section>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const fullname = document.getElementById('fullname').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            // Email validation
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!emailPattern.test(email)) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+
+            // Check if email is already used
+            const response = await fetch('/check-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email })
+            });
+
+            const data = await response.json();
+
+            if (data.exists) {
+                alert("Email is already registered.");
+                return;
+            }
+
+            // Proceed to add user if email is not taken
+            const addUserResponse = await fetch('/add-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: fullname,
+                    email: email,
+                    password: password
+                })
+            });
+
+            const addUserData = await addUserResponse.json();
+            if (addUserResponse.ok) {
+                alert("User registered successfully!");
+                document.getElementById('register-form').reset(); 
+                window.location.href = 'index.html'; 
+            } else {
+                alert(`Error: ${addUserData.error}`);
+                document.getElementById('register-form').reset(); 
+            }
+        });
+    </script>
+</body>
+</html>
+
+<style>
+    @font-face {
+        font-family: 'Nasalization';
+        src: url('fonts/nasalization-rg.otf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    @font-face {
+        font-family: 'Roboto';
+        src: url('fonts/Roboto-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: white;
+    }
+
+    header.dashboard {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: rgb(255, 255, 255);
+        color: black;
+        position: relative;        
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    header.dashboard .logo img {
+        width: 90px;
+        height: 75px;
+    }
+
+    header.dashboard .center-image {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    header.dashboard .center-image img {
+        width: 80px;
+        height: auto;
+    }
+
+    header.dashboard .navigation ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+    }
+
+    header.dashboard .navigation ul li {
+        margin-left: 20px;
+    }
+
+    header.dashboard .navigation ul li a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: 'Roboto', sans-serif;
+        padding: 10px 20px;
+        border: 2px solid black;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    header.dashboard .navigation ul li a:hover {
+        background-color: black;
+        color: white;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    section.register-container {
+        width: 30%;
+        margin: 100px auto;
+        padding: 40px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    section.register-container h2 {
+        font-family: 'Nasalization', sans-serif;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    section.register-container .input-group {
+        margin-bottom: 20px;
+    }
+
+    section.register-container .input-group label {
+        display: block;
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        margin-bottom: 8px;
+        padding-left: 45px;
+        text-align: left;
+    }
+
+    section.register-container .input-group input {
+        width: 75%;
+        padding: 10px;
+        font-size: 16px;
+        font-family: 'Roboto', sans-serif;
+        border: 2px solid black;
+        border-radius: 5px;
+    }
+
+    section.register-container .register-button {
+        width: 45%;
+        padding: 10px;
+        font-size: 16px;
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold;
+        color: white;
+        background-color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    section.register-container .register-button:hover {
+        background-color: gray;
+    }
+
+    section.register-container .register-footer {
+        margin-top: 20px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+    }
+
+    section.register-container .register-footer a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s;
+    }
+
+    section.register-container .register-footer a:hover {
+        color: gray;
+    }
+</style>

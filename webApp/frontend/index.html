@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="dashboard">
+        <div class="logo">
+            <img src="images/texas-am-university-logo-black-and-white.png" alt="Logo">
+        </div>
+        <nav class="navigation">
+            <ul id="auth-buttons">
+                <li id="user-icon-container">
+                    <div class="user-icon" id="user-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown" id="user-dropdown" style="display: none;">
+                        <a href="account.html" id="account-option" style="display: none;">Account</a>
+                        <a href="sign-in.html" id="sign-in-option">Sign in</a>
+                        <a href="register.html" id="register-option">Register</a>
+                        <a href="#" id="sign-out-option" style="display: none;">Sign out</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="banner">
+        <img src="images/background.png" alt="Banner Image" class="banner-image">
+        
+        <div class="scrolling-image-container">
+            <img src="images/bubbles.png" alt="Scrolling Image" class="scrolling-image">
+        </div>
+        
+        <div class="overlay-image-container">
+            <img src="images/labrat-name.png" alt="Overlay Image" class="overlay-image">
+            <p class="overlay-text">Your Lab (re)Search Engine</p>
+        </div>
+    </section>
+
+    <section class="search-bar-container">
+        <input type="text" class="search-bar" placeholder="Search">
+        <span class="search-icon"><i class="fas fa-magnifying-glass"></i></span>
+    </section>
+
+    <section class="filter-container">
+        <div class="filter">
+            <label for="equipment-type">Equipment Type:</label>
+            <select id="equipment-type" name="equipment-type">
+                <option value="all">All</option>
+                <option value="flasks">Flasks</option>
+                <option value="screws">Screws</option>
+                <option value="computer-hardware">Computer Hardware</option>
+                <option value="pipettes">Pipettes</option>
+                <option value="microscopes">Microscopes</option>
+            </select>
+        </div>
+        <div class="filter">
+            <label for="brand">Brand:</label>
+            <select id="brand" name="brand">
+                <option value="all">All</option>
+                <option value="brand-a">Brand A</option>
+                <option value="brand-b">Brand B</option>
+                <option value="brand-c">Brand C</option>
+            </select>
+        </div>
+        <div class="filter">
+            <label for="availability">Availability:</label>
+            <select id="availability" name="availability">
+                <option value="all">All</option>
+                <option value="in-stock">In Stock</option>
+                <option value="out-of-stock">Out of Stock</option>
+                <option value="limited">Limited</option>
+            </select>
+        </div>
+    </section>    
+
+    <section class="information">
+        <div class="info-text">
+            <h2>What is LabRat?</h2>
+            <p>LabRat is your research laboratory database management destination. 
+                LabRat revolutionizes the way laboratories manage their inventory by
+                offering a cutting-edge search engine with advanced filtering capabilities 
+                to streamline the organization of your essential supplies and equipment. With 
+                its intuitive interface, LabRat simplifies the tracking of inventory 
+                and empowers researchers to optimize their workflow, and guarantees that they 
+                have the right tools at their fingertips when they need them. Experience 
+                unparalleled efficiency and precision in inventory management, as LabRat 
+                transforms your laboratory into a beacon of innovation and productivity.</p>
+        </div>
+        <div class="info-image">
+            <img src="images/new-labrat-glass.png" alt="LabRat Information Image">
+        </div>
+    </section>
+
+    <script>
+        // Fetch the current logged-in user
+        async function fetchCurrentUser() {
+            try {
+                const response = await fetch('/current-user');
+                if (response.ok) {
+                    const data = await response.json();
+                    const userName = data.user.name;
+                    const firstLetter = userName.charAt(0).toUpperCase();
+
+                    // Show the first letter of the user's name in the icon
+                    document.getElementById('user-icon').innerHTML = firstLetter;
+
+                    // Hide Sign-in and Register, show Account and Sign-out options
+                    document.getElementById('sign-in-option').style.display = 'none';
+                    document.getElementById('register-option').style.display = 'none';
+                    document.getElementById('account-option').style.display = 'block';
+                    document.getElementById('sign-out-option').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching user:', error);
+            }
+        }
+
+        // Sign-out functionality
+        async function signOutUser() {
+            try {
+                const response = await fetch('/sign-out', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = 'index.html';
+                } else {
+                    alert("Error signing out.");
+                }
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        }
+
+        // Set up sign-out option click event
+        document.getElementById('sign-out-option').addEventListener('click', signOutUser);
+
+        // Set up click event to toggle the dropdown visibility
+        document.getElementById('user-icon').addEventListener('click', function() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Hide dropdown when clicking outside of it
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const userIcon = document.getElementById('user-icon');
+
+            if (!dropdown.contains(event.target) && !userIcon.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Call the function to load the user when the page loads
+        window.onload = fetchCurrentUser;
+    </script>
+
+</body>
+</html>
