@@ -50,10 +50,10 @@
 
     <script>
         document.getElementById('register-form').addEventListener('submit', async function (event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent the form from submitting normally
 
             const fullname = document.getElementById('fullname').value;
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim(); // Trim spaces around the email
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
@@ -63,7 +63,7 @@
                 return;
             }
 
-            // Email validation
+            // Email validation regex pattern (RFC 5322)
             const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
             if (!emailPattern.test(email)) {
@@ -103,11 +103,11 @@
             const addUserData = await addUserResponse.json();
             if (addUserResponse.ok) {
                 alert("User registered successfully!");
-                document.getElementById('register-form').reset(); 
-                window.location.href = 'index.html'; 
+                document.getElementById('register-form').reset(); // Clear input fields
+                window.location.href = 'index.html'; // Redirect after successful registration
             } else {
                 alert(`Error: ${addUserData.error}`);
-                document.getElementById('register-form').reset(); 
+                document.getElementById('register-form').reset(); // Clear input fields
             }
         });
     </script>
@@ -159,7 +159,7 @@
     }
 
     header.dashboard .center-image img {
-        width: 80px;
+        width: 80px; /* Adjust the size as needed */
         height: auto;
     }
 
@@ -189,7 +189,7 @@
         background-color: black;
         color: white;
         font-weight: bold;
-        text-decoration: none;
+        text-decoration: none; /* Ensure there's no underline on hover */
     }
 
     section.register-container {

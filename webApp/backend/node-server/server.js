@@ -13,10 +13,10 @@ app.use(cookieParser());
 
 // Initialize session middleware
 app.use(session({
-    secret: 'your-secret-key',
+    secret: 'your-secret-key', // Use a secure secret key for session encryption
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { secure: false } // Set secure: true if using HTTPS
 }));
 
 // Initialize SQLite database
@@ -61,9 +61,9 @@ app.post('/check-email', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
         if (row) {
-            res.json({ exists: true });
+            res.json({ exists: true }); // Email found in the database
         } else {
-            res.json({ exists: false });
+            res.json({ exists: false }); // Email not found
         }
     });
 });
@@ -100,7 +100,7 @@ app.post('/sign-in', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
         if (!row) {
-            return res.status(401).json({ valid: false, error: "User not found" });
+            return res.status(401).json({ valid: false, error: "User not found" }); // User not found
         }
 
         // Compare the provided password with the hashed password in the database
@@ -137,10 +137,29 @@ app.post('/sign-out', (req, res) => {
         if (err) {
             return res.status(500).json({ error: 'Could not log out, please try again.' });
         }
-        res.clearCookie('connect.sid');
+        res.clearCookie('connect.sid'); // Clear the session cookie
         res.json({ message: "Sign-out successful" });
     });
 });
+
+app.delete('/delete-user', async (req, res) => {
+    const email = req.body.email;
+
+    try {
+        // Query to delete the user by email in the database
+        const result = await db.run('DELETE FROM users WHERE email = ?', [email]);
+        
+        if (result.changes > 0) {
+            res.status(200).send({ message: 'User deleted successfully.' });
+        } else {
+            res.status(404).send({ message: 'User not found.' });
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).send({ message: 'Error deleting user.' });
+    }
+});
+
 
 // Start the server
 app.listen(PORT, () => {

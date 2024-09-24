@@ -42,7 +42,7 @@
 
     <script>
         document.getElementById('sign-in-form').addEventListener('submit', async function (event) {
-            event.preventDefault(); 
+            event.preventDefault(); // Prevent form from submitting normally
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -65,11 +65,12 @@
             const data = await response.json();
 
             if (response.ok && data.valid) {
-                document.getElementById('sign-in-form').reset(); 
-                window.location.href = 'index.html'; 
+                //alert('Sign-in successful!');
+                document.getElementById('sign-in-form').reset(); // Clear the input fields
+                window.location.href = 'index.html'; // Redirect on successful sign-in
             } else {
                 alert('Invalid email or password.');
-                document.getElementById('sign-in-form').reset();
+                document.getElementById('sign-in-form').reset(); // Clear the input fields
             }
         });
     </script>
@@ -121,7 +122,7 @@
     }
 
     header.dashboard .center-image img {
-        width: 80px;
+        width: 80px; /* Adjust the size as needed */
         height: auto;
     }
 
@@ -151,7 +152,7 @@
         background-color: black;
         color: white;
         font-weight: bold;
-        text-decoration: none;
+        text-decoration: none; /* Ensure there's no underline on hover */
     }
 
     section.sign-in-container {

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="dashboard">
+        <div class="logo">
+            <img src="images/texas-am-university-logo-black-and-white.png" alt="Logo">
+        </div>
+        <div class="center-image">
+            <a href="index.html">
+                <img src="images/green-logo.png" alt="Center Image">
+            </a>            
+        </div>
+        <nav class="navigation">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="account-container">
+        <div class="account-left">
+            <div class="user-icon-large" id="user-icon-large">
+                <!-- User's icon with the first letter of their name will be dynamically updated -->
+            </div>
+        </div>
+        <div class="account-right">
+            <h2>Account Details</h2>
+            <div class="account-details">
+                <p><strong>Name:</strong> <span id="user-name">Loading...</span></p>
+                <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
+                <p><strong>Associated Labs:</strong></p>
+                <ul id="user-labs">
+                    <li>Loading...</li>
+                </ul>
+                <button id="delete-account-btn" class="delete-btn">Delete Account</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Function to fetch the current user's data
+        async function fetchCurrentUser() {
+            try {
+                const response = await fetch('/current-user');
+
+                // If user is not authenticated, redirect them to home page
+                if (response.status === 401) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+            
+                if (response.ok) {
+                    const data = await response.json();
+                    const userName = data.user.name;
+                    const userEmail = data.user.email;
+                    const userLabs = data.user.labs || []; // Assuming an array for associated labs
+                
+                    // Display user's name and email
+                    document.getElementById('user-name').textContent = userName;
+                    document.getElementById('user-email').textContent = userEmail;
+                
+                    // Populate associated labs
+                    const labsList = document.getElementById('user-labs');
+                    labsList.innerHTML = ''; // Clear loading text
+                    userLabs.forEach(lab => {
+                        const labItem = document.createElement('li');
+                        labItem.textContent = lab;
+                        labsList.appendChild(labItem);
+                    });
+                
+                    // Set the first letter of the user's name as the icon content
+                    document.getElementById('user-icon-large').textContent = userName.charAt(0).toUpperCase();
+                
+                    // Add event listener for the delete account button
+                    document.getElementById('delete-account-btn').addEventListener('click', async () => {
+                        const confirmed = confirm("Are you sure you want to delete your account? This action is irreversible.");
+                        if (confirmed) {
+                            await deleteAccount(userEmail);
+                        }
+                    });
+                } else {
+                    console.error('Error fetching user data');
+                }
+            } catch (error) {
+                console.error('Error fetching user:', error);
+            }
+        }
+
+        // Function to delete the user's account
+        async function deleteAccount(email) {
+            try {
+
+                const logoutResponse = await fetch('/sign-out', { method: 'POST' });
+                if (!logoutResponse.ok) {
+                    throw new Error('Failed to log out');
+                }
+
+                // 2. Redirect to index.html
+                window.location.href = 'index.html';
+
+                const response = await fetch('/delete-user', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+            
+                if (response.ok) {
+                    alert('Account deleted successfully.');
+                } else {
+                    console.error('Error deleting user');
+                }
+            } catch (error) {
+                console.error('Error deleting account:', error);
+            }
+        }
+
+        // Call the function to load user data when the page loads
+        window.onload = fetchCurrentUser;
+    </script>
+</body>
+</html>
+
+<style>
+    @font-face {
+        font-family: 'Nasalization';
+        src: url('fonts/nasalization-rg.otf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    
+    @font-face {
+        font-family: 'Roboto';
+        src: url('fonts/Roboto-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: white;
+    }
+    
+    header.dashboard {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: rgb(255, 255, 255);
+        color: black;
+        position: relative;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    header.dashboard .logo img {
+        width: 90px;
+        height: 75px;
+    }
+    
+    header.dashboard .center-image {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    header.dashboard .center-image img {
+        width: 80px;
+        height: auto;
+    }
+    
+    header.dashboard .navigation ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+    }
+    
+    header.dashboard .navigation ul li {
+        margin-left: 20px;
+    }
+    
+    header.dashboard .navigation ul li a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: 'Roboto', sans-serif;
+        padding: 10px 20px;
+        border: 2px solid black;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    
+    header.dashboard .navigation ul li a:hover {
+        background-color: black;
+        color: white;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    
+    section.account-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; 
+        width: 80%;
+        margin: 100px auto;
+        padding: 40px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    section.account-container .account-left {
+        flex-basis: 25%;
+        display: flex;
+        justify-content: flex-start; 
+        align-items: center; 
+    }
+    
+    .user-icon-large {
+        width: 120px;
+        height: 120px;
+        background-color: #6f6f6f;
+        color: white;
+        font-size: 50px;
+        font-weight: bold;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: default;
+    }
+    
+    section.account-container .account-right {
+        flex-basis: 70%;
+    }
+    
+    section.account-container h2 {
+        font-family: 'Nasalization', sans-serif;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    
+    section.account-container .account-details p,
+    section.account-container .account-details ul {
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+    
+    section.account-container .account-details ul {
+        list-style-type: disc;
+        padding-left: 20px;
+    }
+
+    .user-icon-large:hover {
+        box-sizing: border-box;
+        width: 120px; 
+        border-radius: 50%; 
+        background-color: #6f6f6f; 
+        border: 8px solid rgba(255, 255, 255, 0.1); 
+
+    }
+
+    .user-icon-large:hover::after {
+        content: '✎';
+        font-size: 30px;
+        margin-left: 10px; 
+    }
+
+    .delete-btn {
+        background-color: #e74c3c;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: 'Roboto', sans-serif;
+        transition: background-color 0.3s;
+        margin-top: 20px;
+    }
+    
+    .delete-btn:hover {
+        background-color: #c0392b;
+    }
+</style>
