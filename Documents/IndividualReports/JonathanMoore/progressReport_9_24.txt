@@ -1,0 +1,3 @@
+I added an account page to the webapp with a button to delete the currently logged-in user.
+I had issues on the backend and getting the delete requests to go through.
+I hope to add more features to this page like changing account information, name, etc.
