@@ -1,0 +1,13 @@
+Porgress Update for October 1, 2024
+Currently working on getting a working server.
+Last week, on Tuesday September 24, 2024, I spoke and asked Stavros about getting a working server, and he said 
+to try one of two things:
+    1) get a free instance from an online server, and make sure I dont get charged (that they dont ask for any credit card information)
+    2) email Paul Gratz about getting access to a server through A&M  
+
+I went ahead and did both. 
+Paul Gratz said he didnt have access to any A&M server, and he directed me to Engineering IT.
+Engineering IT then directed me to Texas A&M High Performance Research Computing. I spoke about all these
+updates with Professor Stavros and our TA Shima. I am currently waiting to hear back from HPRC, but Professor Stavros
+mentioned that it seems like I'll be able to get some sort of working cluster through them.
+So in the meantime while I wait to hear back, I will work on creating more databases.
