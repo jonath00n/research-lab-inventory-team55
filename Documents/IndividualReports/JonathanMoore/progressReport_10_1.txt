@@ -1,0 +1,6 @@
+-This week I added account information changing and customization. 
+-I struggled a lot with trying to get current information from the 
+ db on the server side. Certain routes were not updating properly.
+-Next week I plan on getting the search feature started. Not sure
+ how far I will get.
+ 
