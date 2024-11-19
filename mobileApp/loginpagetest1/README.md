@@ -1,16 +1,16 @@
 # loginpagetest1
 
-A new Flutter project.
+Welcome to LabRat!!
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This app is designed to assist in tracking the inventory in various labs.
 
-A few resources to get you started if this is your first Flutter project:
+A few resources for the Flutter project:
 
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
+Online documentation that can help
+[online documentation](https://docs.flutter.dev/), offers tutorials,
 samples, guidance on mobile development, and a full API reference.

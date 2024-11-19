@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'home_page.dart';
+// all packages and other pages referenced for this page ^
+
+// This page is the main page. It is the builds and initializes the app
+// It is not actually used as a page because when opened it automatically
+// references the Login page and immediately sends the user there to start.
+
+// This page contains a counter which is the default code when a flutter app
+// is created, thought the counter is not seen or used at all
 
 
 void main() {
