@@ -14,7 +14,8 @@ import 'home_page.dart';
 void main() {
   runApp(const MyApp());
 }
-
+// This creates the MyApp as a stateful widget
+// this means that it is able to be changed based on interaction or other events
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

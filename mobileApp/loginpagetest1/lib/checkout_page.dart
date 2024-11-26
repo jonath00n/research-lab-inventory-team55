@@ -9,7 +9,8 @@ import 'package:flutter_glow/flutter_glow.dart';
 
 
 
-
+// This creates the CheckoutPage as a stateful widget
+// this means that it is able to be changed based on interaction or other events
 class CheckoutPage extends StatefulWidget {
   final Map<String, dynamic> item;
 
@@ -20,15 +21,22 @@ class CheckoutPage extends StatefulWidget {
 }
 
 
-
+// The line below creates a class for the CheckoutPage
+// The underscore makes it private to the dart file (though this is unnecessary)
+// manages the State of the page and can rebuild the UI when needed
 class _CheckoutPageState extends State<CheckoutPage> {
+  // controllers are used to track quantity entered, email is no longer tracked this way
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
+  // makes it easier to use database functions
   final AuthenticationDB dbStuff = AuthenticationDB();
+  // sets the acknowledgement check box variable
   bool _acknowledgement = false;
 
 
+  // checkout function
   void _checkoutItem() async {
+    // sets old and new quantity
     int checkoutQuantity = int.tryParse(_quantityController.text) ?? 0;
     int currentQuantity =  int.tryParse(widget.item['quantity']) ?? 0;
     int returnable = widget.item['returnable'] ?? 0;
@@ -40,7 +48,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       );
       return;
     }
-
+    // makes sure that the acknowledgement is checked
     if (_acknowledgement == false) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please check the user acknowlegement')),
@@ -50,18 +58,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     // Calculate the new quantity
     int newQuantity = currentQuantity - checkoutQuantity;
-    int itemId = widget.item['id2']; // Replace 'id2' with the actual ID key of the item
+    int itemId = widget.item['id2'];
     int result = await AuthenticationDB().updateItemQuantity(itemId, newQuantity);
     if (returnable == 1) {
-      _addCheckoutList(); // Call add-to-checkout-list function
+      _addCheckoutList(); // Call add to checkout list function
     }
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()), // Change to your home screen widget
+      MaterialPageRoute(builder: (context) => HomePage()), // sends to home page
     );
   }
 
+  // function to check in an item
   void _checkInItem() async {
+    // sets old quantity from table
     int checkInQuantity = int.tryParse(_quantityController.text) ?? 0;
     int currentQuantity =  int.tryParse(widget.item['quantity']) ?? 0;
 
@@ -79,16 +89,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
     int result = await AuthenticationDB().updateItemQuantity(itemId, newQuantity);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()), // Change to your home screen widget
+      MaterialPageRoute(builder: (context) => HomePage()), // sends to home page
     );
   }
 
+  // adds an entry to active checkout list
   void _addCheckoutList() async {
 
       String item = widget.item['item'];
       String quantity = _quantityController.text.trim();
 
       int result = await dbStuff.addCheckoutList(item, quantity);
+      // displays whether this was successful
       if (result != -1) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Checkout User added successfully!')),
@@ -100,6 +112,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       }
   }
 
+  // subtracts from active checkout list if an item is checked back in
   void _subtractCheckoutList() async {
     int returnable = widget.item['returnable'] ?? 0;
     if (returnable == 1) {
@@ -109,7 +122,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       int result = await dbStuff.subtractCheckoutList(item, quantity);
       if (result != -1) {
-        _checkInItem();
+        _checkInItem(); // calls check in function
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Check In User added successfully!')),
         );
@@ -126,20 +139,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
-
-  /*@override
-  void dispose() {
-    // Dispose of the controllers when the widget is removed
-    _emailController.dispose();
-    _quantityController.dispose();
-    super.dispose();
-  }*/
-
+  // This builds the widget that is the UI for this page
+  // It contains more widgets for buttons, text, ect.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
 
+      // padding and other functions makes UI look better
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Column(
@@ -167,24 +174,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),),
             SizedBox(height: 10),
 
-            /* Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  border: Border.all(color: Colors.white),
-                ),
-                child: TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Email',
-                  ),
-                ),
-              ),
-            ), */
-
-
+            // box to enter the desired quantity
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: Container(
@@ -207,7 +197,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             const SizedBox(height: 5),
 
 
-            TextButton(
+            TextButton( // button to check out the item
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
@@ -229,7 +219,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
             ),
 
-            TextButton(
+            TextButton( // button to check in the item
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
@@ -252,7 +242,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
             const SizedBox(height: 10),
 
-            Center(
+            Center( // a&m picture
               child: Container(
                 height: 220,
                 width: 220,
@@ -261,7 +251,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
             const SizedBox(height: 10),
 
-            Row(
+            Row(  // acknowledgment box
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Checkbox(
@@ -284,7 +274,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
             const SizedBox(height: 10),
 
-            Align(
+            Align( // sends the user back to the home page
               alignment: Alignment.centerRight,
 
               child: TextButton(

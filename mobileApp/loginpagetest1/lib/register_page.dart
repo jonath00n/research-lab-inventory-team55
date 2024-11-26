@@ -10,15 +10,20 @@ import 'package:flutter_glow/flutter_glow.dart';
 
 
 
+// This page is where a new user can register
+// they enter their email and chose a password which will be entered in the users table of the database
 
-
-
+// This creates the RegisterPage as a stateful widget
+// this means that it is able to be changed based on interaction or other events
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
+// The line below creates a class for the RegisterPage
+// The underscore makes it private to the dart file (though this is unnecessary)
+// manages the State of the page and can rebuild the UI when needed
 class _RegisterPageState extends State<RegisterPage> {
 
   // database stuff
@@ -26,28 +31,28 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthenticationDB dbStuff = AuthenticationDB();
 
-  void _register() async {
+  void _register() async {  // puts email and password entered into controllers
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (await dbStuff.isUserExists(email)) {
+    if (await dbStuff.isUserExists(email)) { // if email already exists in table show error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Email already exists.')),
       );
     }
-    else if (!EmailValidator.validate(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    else if (!EmailValidator.validate(email)) { // checks to see if the email is a valid email
+      ScaffoldMessenger.of(context).showSnackBar( // displays an error if it is not valid
         const SnackBar(content: Text('Use a Valid Email Address.')),
       );
     }
     else {
-      int result = await dbStuff.registerUser(email, password);
+      int result = await dbStuff.registerUser(email, password); // registers user by calling function in database file
       if (result != -1) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('User registered successfully!')),
         );
         Navigator.pop(context);
-      } else {
+      } else { // displays error if the user was not able to be registered
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Registration failed.')),
         );
@@ -55,6 +60,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  // function that deletes the database
   void _deleteDatabase() async {
     await AuthenticationDB().deleteDatabaseFile();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -63,6 +69,8 @@ class _RegisterPageState extends State<RegisterPage> {
   }
   // database stuff end
 
+  // This builds the widget that is the UI for this page
+  // It contains more widgets for buttons, text, ect.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,14 +93,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       fontSize: 20,
                     ),),
                   const SizedBox(height: 20),
-                  Padding(
+                  Padding( // box for users to enter their email
                     padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                         border: Border.all(color: Colors.white),
                       ),
-                      child: TextField(
+                      child: TextField( // uses the email controller to track
                         controller: _emailController,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
@@ -104,7 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
 
                   const SizedBox(height: 20),
-                  Padding(
+                  Padding( // text box for users to enter their password
                     padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: Container(
                       decoration: BoxDecoration(
@@ -112,7 +120,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         border: Border.all(color: Colors.white),
                       ),
                       child: TextField(
-                        controller: _passwordController,
+                        controller: _passwordController, // uses password controller to track
                         obscureText: true,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
@@ -126,7 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
 
 
-                  TextButton(
+                  TextButton( // button that registeres the user based on credentials provided
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
@@ -141,10 +149,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               fontSize: 20,
                             )),
                       ),),
-                    onPressed: _register,
+                    onPressed: _register, // calls register function
                   ),
 
-                  Center(child: TextButton(
+                  Center(child: TextButton( // sends the user back to the login screen
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
@@ -172,7 +180,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 20),
 
 
-                  Container(
+                  Container( // image
                       height: 200,
                       width: 200,
                       child: Image.asset( 'assets/green-logo.png', fit: BoxFit.cover)
@@ -180,6 +188,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   const SizedBox(height: 135),
 
+                  // button for deleting the database
+                  // not meant to be in the final app
+                  /*
                   TextButton(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -196,7 +207,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             )),
                       ),),
                     onPressed: _deleteDatabase,
-                  ),
+                  ), */
 
 
 

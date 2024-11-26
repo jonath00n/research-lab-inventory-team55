@@ -9,39 +9,49 @@ import 'package:flutter_glow/flutter_glow.dart';
 
 
 
-
+// this declares the userEmail as a global variable
+// This means that it is able to be used elsewhere in the program
+// This is important because the email needs to be tracked to know which user is logged in
+// This makes it so we can record which users checkout which items
 String? userEmail;
 
 
-
+// This creates the AddComponentPage as a stateful widget
+// this means that it is able to be changed based on interaction or other events
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
+
+// The line below creates a class for the AddComponentPage
+// The underscore makes it private to the dart file (though this is unnecessary)
+// manages the State of the page and can rebuild the UI when needed
 class _LoginPageState extends State<LoginPage> {
 
 
-
+  // controllers for tracking email and password
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthenticationDB dbStuff = AuthenticationDB();
+  final AuthenticationDB dbStuff = AuthenticationDB(); // makes it easy to use database functions
 
   void _login() async {
+    // sets the controllers to the text entered
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     userEmail = _emailController.text.trim();
 
+    // determines if the user exists and logs them in if they do
     bool isLoggedIn = await dbStuff.loginUser(email, password);
     if (isLoggedIn) {
       // Navigate to Home Page or another screen
-      Navigator
+      Navigator // sends them to the home page if logged in
           .push(
           context,
           MaterialPageRoute(builder: (context) => const HomePage())
       );
-    } else {
+    } else {  // displays invalid email or password if user does not exist
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid email or password.')),
       );
@@ -49,7 +59,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
 
-
+  // This builds the widget that is the UI for this page
+  // It contains more widgets for buttons, text, ect.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
 
         backgroundColor: Colors.grey[200],
       body: DecoratedBox(
-          decoration: BoxDecoration(
+          decoration: BoxDecoration( // backround image of zach
             image: DecorationImage(
                 image: AssetImage("assets/IMG_5020.heic"), fit: BoxFit.cover),
           ),
@@ -65,27 +76,29 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(children: [
 
         const SizedBox(height: 35),
-        GlowText('Welcome To LabRat',
+        GlowText('Welcome To LabRat',  // glow text
         style: GoogleFonts.orbitron(
           fontSize: 30,
           color: Colors.white,
         ),
         ),
         const SizedBox(height: 10),
-            GlowText('Your Lab (re)Search Engine',
+            GlowText('Your Lab (re)Search Engine', // glow text
                 style: GoogleFonts.roboto(
                   fontSize: 20,
                   color: Colors.white,
                 ),),
+
         const SizedBox(height: 20),
-        Padding(
+
+        Padding( // text box for the users email
         padding: const EdgeInsets.symmetric(horizontal: 40.0),
          child: Container(
            decoration: BoxDecoration(
              color: Colors.grey[100],
            ),
          child: TextField(
-           controller: _emailController,
+           controller: _emailController, // uses email controller
            decoration: InputDecoration(
              border: OutlineInputBorder(
                borderRadius: BorderRadius.circular(2.0),
@@ -98,14 +111,15 @@ class _LoginPageState extends State<LoginPage> {
         ),
 
         const SizedBox(height: 20),
-        Padding(
+
+        Padding( // text box for the users password
           padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.grey[100],
             ),
             child: TextField(
-              controller: _passwordController,
+              controller: _passwordController, // uses password controller
               obscureText: true,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
@@ -120,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
 
 
 
-        TextButton(
+        TextButton( // text button to log in the user with credentials entered
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
@@ -137,10 +151,10 @@ class _LoginPageState extends State<LoginPage> {
 
                   )),
             ),),
-          onPressed: _login,
+          onPressed: _login,  // calls the login function
         ),
 
-        Center(child: TextButton(
+        Center(child: TextButton( // button to register new user if they do not have a login
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
@@ -156,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                   )),
             ),),
           onPressed: () {
-            Navigator
+            Navigator // when pressed this sends the user to the register page
                 .push(
                 context,
                 MaterialPageRoute(builder: (context) => const RegisterPage())
@@ -166,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
 
         const SizedBox(height: 50),
 
-        GlowContainer(
+        GlowContainer(  // labrat image
             height: 200,
             width: 200,
          //   color: Colors.green,
@@ -177,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
 
 
         TextButton(
-          child: Container(
+          child: Container(  // button to send the user to the FAQ page
             padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               color: Colors.green,

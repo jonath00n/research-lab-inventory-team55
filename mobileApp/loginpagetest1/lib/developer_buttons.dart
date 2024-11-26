@@ -11,6 +11,14 @@ import 'home_page.dart';
 import 'authentication_db.dart';
 // all packages and other pages referenced for this page ^
 
+
+// this page is meant to only be accessed by the developer
+// it is where you can add components and view active checkouts
+// you can also delete the database here
+
+
+// This creates the DeveloperPage as a stateful widget
+// this means that it is able to be changed based on interaction or other events
 class DeveloperPage extends StatefulWidget {
   const DeveloperPage({super.key});
 
@@ -19,13 +27,14 @@ class DeveloperPage extends StatefulWidget {
 }
 
 
-
+// The line below creates a class for the AddComponentPage
+// The underscore makes it private to the dart file (though this is unnecessary)
+// manages the State of the page and can rebuild the UI when needed
 class _DeveloperState extends State<DeveloperPage> {
 
-  void _performCheckoutListSearch() {
-    String query = "*";
+  void _performCheckoutListSearch() { // this function creates a query from all active checkouts
+    String query = "*"; // the list sends you to checkoutlistscreen with query
     if (query.isNotEmpty) {
-      // Navigate to SearchResultPage and pass the search query
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -35,13 +44,15 @@ class _DeveloperState extends State<DeveloperPage> {
     }
   }
 
-  void _deleteDatabase() async {
+  void _deleteDatabase() async { // this deletes the database
     await AuthenticationDB().deleteDatabaseFile();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Database deleted!')),
     );
   }
 
+  // This builds the widget that is the UI for this page
+  // It contains more widgets for buttons, text, ect.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,8 +68,8 @@ class _DeveloperState extends State<DeveloperPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  TextButton(
-                    child: Container(
+                  TextButton( // button for adding a component
+                    child: Container( // sends to add component page
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
                         color: Colors.green,
@@ -81,7 +92,7 @@ class _DeveloperState extends State<DeveloperPage> {
                     },
                   ),
 
-                  TextButton(
+                  TextButton( // button for viewing active checkouts
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
@@ -96,10 +107,10 @@ class _DeveloperState extends State<DeveloperPage> {
                               fontSize: 20,
                             )),
                       ),),
-                    onPressed: _performCheckoutListSearch,
+                    onPressed: _performCheckoutListSearch,  // calls perform checkout list
                   ),
                   Center(
-                      child: TextButton(
+                      child: TextButton( // sends the user back to the home page
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           decoration: BoxDecoration(
@@ -121,7 +132,7 @@ class _DeveloperState extends State<DeveloperPage> {
                         },
                       )),
 
-                  TextButton(
+                  TextButton( // calls the delete database function
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(

@@ -16,7 +16,8 @@ import 'package:image_picker/image_picker.dart';
 
 
 
-
+// This creates the HomePage as a stateful widget
+// this means that it is able to be changed based on interaction or other events
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -34,12 +35,13 @@ class _HomePageState extends State<HomePage> {
   TextEditingController _searchDropdownController2 = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-
+// function to open the camera
   Future<void> _openCamera() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
   }
 
-
+// performs a search of the items with the name that is entered in the search box
+  // text is retrieved using the search controller
   void _performSearch() {
     String query = _searchController.text;
     if (query.isNotEmpty) {
@@ -52,6 +54,8 @@ class _HomePageState extends State<HomePage> {
       );
     }
   }
+
+  // performs a search of all of the items
   void _performAllSearch() {
     String query = "*";
     if (query.isNotEmpty) {
@@ -65,6 +69,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // searches the checkout list
+  // not currently used in this page
   void _performCheckoutListSearch() {
     String query = "*";
     if (query.isNotEmpty) {
@@ -78,6 +84,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // this is not used as of right now since i decided not to use dropdown menus
   void _performDropdownSearch() {
     String query = _searchDropdownController.text;
     String query2 = _searchDropdownController2.text;
@@ -94,6 +101,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // This builds the widget that is the UI for this page
+// It contains more widgets for buttons, text, ect.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,7 +121,7 @@ class _HomePageState extends State<HomePage> {
 
                 const SizedBox(height: 40),
 
-                  GestureDetector
+                  GestureDetector // makes it so that you can click on the image to go to the developer page
                     (
                     onTap: () {
                       // Navigate to CheckoutPage with the selected item
@@ -136,7 +145,7 @@ class _HomePageState extends State<HomePage> {
 
 
 
-
+                // the dropdown menus are not currently used, though they may be added back later
 
                   /* DropdownMenu(
                   controller: _searchDropdownController,
@@ -191,7 +200,7 @@ class _HomePageState extends State<HomePage> {
 
                   const SizedBox(height: 20),
 
-                  Padding(
+                  Padding( // text box to search items
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Container(
                       decoration: BoxDecoration(
@@ -199,7 +208,7 @@ class _HomePageState extends State<HomePage> {
                         border: Border.all(color: Colors.white),
                       ),
                       child: TextField(
-                        controller: _searchController,
+                        controller: _searchController, // uses the search controller to create query
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(2.0),
@@ -213,7 +222,7 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 20),
 
 
-                  TextButton(
+                  TextButton( // button to search based on text entered in search box
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
@@ -228,7 +237,7 @@ class _HomePageState extends State<HomePage> {
                               fontSize: 20,
                             )),
                       ),),
-                    onPressed: _performSearch,
+                    onPressed: _performSearch, // calls the perform search function
                   ),
 
                   GlowText('Or...',
@@ -237,8 +246,8 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
-                  TextButton(
-                    child: Container(
+                  TextButton( // button to view all of the items
+                    child: Container( // populates the query with all item entries
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
                         color: Colors.green,
@@ -252,7 +261,7 @@ class _HomePageState extends State<HomePage> {
                               fontSize: 20,
                             )),
                       ),),
-                    onPressed: _performAllSearch,
+                    onPressed: _performAllSearch,  // calls perform all search
                   ),
 
                   const SizedBox(height: 20),
@@ -265,28 +274,27 @@ class _HomePageState extends State<HomePage> {
 
             //      IconButton(onPressed: _openCamera(), color: Colors.green[400], iconSize: 100, icon: Icon(Icons.camera_alt, color: Colors.green[300])),
 
-                  ElevatedButton.icon(
+                  ElevatedButton.icon( // this is the icon that calls the open camera function
                     onPressed: () {
-                      // Wrap async function in a synchronous callback
-                      _openCamera();
+                      _openCamera(); // calls the open camera function
                     },
                     icon: Icon(
                       Icons.camera_alt,
-                      color: Colors.green[300], // Match the icon color
-                      size: 100,                // Match the icon size
+                      color: Colors.green[300],
+                      size: 100,
                     ),
-                    label: Text(''),
+                    label: Text(''), // formatting for the camera icon
                     style: ElevatedButton.styleFrom(
                       iconColor: Colors.transparent,
                       backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent, // Remove shadow
-                      padding: EdgeInsets.zero, // Remove padding for a compact look
-                      minimumSize: Size(100, 100), // Match the button size to icon size
-                    ),// Match the button size to icon size
+                      shadowColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size(100, 100),
+                    ),
                   ),
 
 
-                  Center(child: TextButton(
+                  Center(child: TextButton( // button that sends the user to the faq page
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
@@ -311,8 +319,8 @@ class _HomePageState extends State<HomePage> {
                     },
                   )),
 
-                  Center(child: TextButton(
-                    child: Container(
+                  Center(child: TextButton( // button that signs out the user
+                    child: Container( // aka sends them to login page
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
                         color: Colors.green,

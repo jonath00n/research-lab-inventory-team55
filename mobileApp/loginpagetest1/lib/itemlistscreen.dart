@@ -5,9 +5,11 @@ import 'checkout_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 // all packages and other pages referenced for this page ^
 
+// this item is the screen that displays the list of items
+// displays them in a table format with columns for different attributes
 
-
-
+// This creates the ItemListScreen as a stateful widget
+// this means that it is able to be changed based on interaction or other events
 class ItemsListScreen extends StatefulWidget {
   final String searchQuery;
   ItemsListScreen({required this.searchQuery});
@@ -16,13 +18,16 @@ class ItemsListScreen extends StatefulWidget {
   _ItemsListScreenState createState() => _ItemsListScreenState();
 }
 
+// The line below creates a class for the AddComponentPage
+// The underscore makes it private to the dart file
+// manages the State of the page and can rebuild the UI when needed
 class _ItemsListScreenState extends State<ItemsListScreen> {
-  List<Map<String, dynamic>> _items = [];
+  List<Map<String, dynamic>> _items = [];  // initializes items list
 
   @override
   void initState() {
     super.initState();
-    _performSearch(widget.searchQuery);
+    _performSearch(widget.searchQuery); // performs search based on query passed
   }
 
   Future<void> _performSearch(String query) async {
@@ -30,15 +35,16 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
 
     if (query == "*") {
       results = await AuthenticationDB().getItems();
-    } else {
+    } else {  // dropdown menus are no longer used
       results = await AuthenticationDB().searchDropdownItems(query);
     }
 
     setState(() {
-      _items = results;
+      _items = results;  // sets items as the result from the query
     });
   }
 
+  // not used currently
   Future<void> _loadItems() async {
     final dbStuff = AuthenticationDB();
     final data = await AuthenticationDB().getItems();
@@ -50,16 +56,17 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
   }
 
 
-
+  // This builds the widget that is the UI for this page
+  // It contains more widgets for buttons, text, ect.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Items List')),
       body: _items.isEmpty ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        child: DataTable(
+        child: DataTable( // puts items in a data table format
           columnSpacing: 15, // Reduces the space between columns
-          columns: [
+          columns: [ // sets column names
             DataColumn(label: Text('Item',style: GoogleFonts.roboto(
               fontSize: 15,
             ),)),
@@ -76,7 +83,7 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
               fontSize: 15,
             ),)),
           ],
-          rows: _items
+          rows: _items // sets the rows for the columns
               .map(
                 (item) => DataRow(
               cells: [
@@ -86,8 +93,8 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
                     fontSize: 15,
                   ),),
                   onTap: () {
-                    Navigator.push(
-                      context,
+                    Navigator.push(  // this column is tappable
+                      context, // it will send you to the associated item checkout screen
                       MaterialPageRoute(
                         builder: (context) => CheckoutPage(item: item),
                       ),
@@ -95,22 +102,22 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
                   },
                 ),
                 DataCell(Text(item['quantity']?.toString() ?? 'No Item', style: GoogleFonts.roboto(
-                  fontSize: 15,
+                  fontSize: 15, // column for item quantity
                 ),)),
                 DataCell(Text(item['availability']?.toString() ?? '0', style: GoogleFonts.roboto(
-                  fontSize: 15,
+                  fontSize: 15, // column for item availability
                 ),)),
               /*  DataCell(Text(item['returnable']?.toString() ?? '0', style: GoogleFonts.roboto(
                   fontSize: 15,
                 ),)), */
-                DataCell(
-                   Image.asset(
-                       'assets/${item['item']}.png', // Dynamically constructs asset path
+                DataCell(  // column for the image of the item
+                   Image.asset( // image is retrieved based on item name
+                       'assets/${item['item']}.png', // item images are pre loaded into the app
                          width: 80,
                          height: 30,
                            fit: BoxFit.cover,
                      errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                     // Show icon if image loading fails
+                     // Show icon not supported if image loading fails
                      return Icon(
                        Icons.image_not_supported_outlined,
                        size: 30,
@@ -120,7 +127,6 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
 
 
                    )
-                  // : Icon(Icons.image_not_supported), // Placeholder if no image
                 ),
               ],
             ),
@@ -128,12 +134,12 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
               .toList(),
         ),
       ),
-      floatingActionButton: TextButton(
+      floatingActionButton: TextButton( // button that sends the user back to the home page
           onPressed: () {
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => const HomePage()));
           },
-    child: Container(
+    child: Container(  // text and formatting for the button
     padding: const EdgeInsets.symmetric(horizontal: 20),
     decoration: BoxDecoration(
     color: Colors.green,

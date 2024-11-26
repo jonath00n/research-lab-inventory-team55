@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loginpagetest1/login_page.dart';
 import 'home_page.dart';
 import 'package:flutter_glow/flutter_glow.dart';
 // all packages and other pages referenced for this page ^
 
+// this is the FAQ page
+// contains mostly text of different sizes with questions and answers
 
+// This creates the FAQPage as a stateful widget
+// this means that it is able to be changed based on interaction or other events
 class FAQPage extends StatefulWidget {
   const FAQPage({super.key});
 
@@ -12,6 +17,8 @@ class FAQPage extends StatefulWidget {
   State<FAQPage> createState() => _FAQState();
 }
 
+// This builds the widget that is the UI for this page
+// It contains more widgets for buttons, text, ect.
 class _FAQState extends State<FAQPage> {
   @override
   Widget build(BuildContext context) {
@@ -116,7 +123,7 @@ class _FAQState extends State<FAQPage> {
                   const SizedBox(height: 20),
 
 
-                  Center(
+                  Center( // button that sends the user back to the home page
               child: TextButton(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20),
