@@ -6,8 +6,10 @@
     <title>Sign In</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="images/green-logo.png" type="image/png">
 </head>
 <body>
+    <!-- DASHBOARD -->
     <header class="dashboard">
         <div class="logo">
             <img src="images/texas-am-university-logo-black-and-white.png" alt="Logo">
@@ -24,6 +26,7 @@
         </nav>
     </header>
 
+    <!-- SIGN-IN FORM -->
     <section class="sign-in-container">
         <h2>Sign In</h2>
         <form id="sign-in-form">
@@ -42,7 +45,7 @@
 
     <script>
         document.getElementById('sign-in-form').addEventListener('submit', async function (event) {
-            event.preventDefault(); // Prevent form from submitting normally
+            event.preventDefault(); 
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -64,13 +67,13 @@
 
             const data = await response.json();
 
+            // Check for good response
             if (response.ok && data.valid) {
-                //alert('Sign-in successful!');
-                document.getElementById('sign-in-form').reset(); // Clear the input fields
-                window.location.href = 'index.html'; // Redirect on successful sign-in
+                document.getElementById('sign-in-form').reset();
+                window.location.href = 'index.html';
             } else {
                 alert('Invalid email or password.');
-                document.getElementById('sign-in-form').reset(); // Clear the input fields
+                document.getElementById('sign-in-form').reset(); 
             }
         });
     </script>
@@ -99,6 +102,7 @@
         background-color: white;
     }
 
+    /* DASHBOARD */
     header.dashboard {
         display: flex;
         justify-content: space-between;
@@ -122,7 +126,7 @@
     }
 
     header.dashboard .center-image img {
-        width: 80px; /* Adjust the size as needed */
+        width: 80px; 
         height: auto;
     }
 
@@ -152,9 +156,10 @@
         background-color: black;
         color: white;
         font-weight: bold;
-        text-decoration: none; /* Ensure there's no underline on hover */
+        text-decoration: none; 
     }
 
+    /* SIGN-IN FORM */
     section.sign-in-container {
         width: 30%;
         margin: 100px auto;

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Page</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="images/green-logo.png" type="image/png">
+</head>
+
+<body>
+    <!-- DASHBOARD -->
+    <header class="dashboard">
+        <div class="logo">
+            <img src="images/texas-am-university-logo-black-and-white.png" alt="TAMU Logo">
+        </div>
+        <nav class="navigation">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- VIAL -->
+        <div class="left-section">
+            <div class="label">
+                LabRat
+                <div class="subtext">ECEN 403-404; 2024-2025</div>
+            </div> 
+            <div class="green-overlay"></div>
+            <div class="white-stripe"></div>
+            <img src="images/black_logo.png" alt="Black LabRat Logo">
+        </div>
+
+        <!-- FAQ -->
+        <div class="right-section">
+            <div class="faq-container">
+                <h1>Frequently Asked Questions</h1>
+                <div class="faq-section">
+                    <div class="faq-item">
+                        <h3>What is LabRat?</h3>
+                        <p>
+                            LabRat is your organizational tool for lab management at Texas A&M University! 
+                            Powered by machine learning, your experience can be streamlined for simple and 
+                            effective use! From this website, users are able to checkout items and those
+                            in higher positions are able to manage and observe activity in the lab.
+                        </p>
+                        <h3>How do I use LabRat?</h3>
+                        <p>
+                            First, access the user registration page by clicking on the user icon on the top 
+                            right of the home page. From there, enter your information to register your account
+                            and you can sign-in whenever you want! To check items back into the lab, we require 
+                            the use of our mobile Android app to scan items for return.
+                        </p>
+                        <h3>How do I change my classification from "Student" to "Profesor" or "Admin"?</h3>
+                        <p>
+                            Contact a current admin of LabRat. Get a reference from a professor or person that 
+                            you know to be an admin, or contact Jonathan Moore (email: jonathancompend@gmail.com).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    const leftSection = document.querySelector('.left-section');
+    let lastMove = 0;
+
+    leftSection.addEventListener('mousemove', (e) => {
+        const currentTime = new Date().getTime();
+        if (currentTime - lastMove > 400) {
+            createBubble(e.pageX, e.pageY);
+            lastMove = currentTime;
+        }
+    });
+
+    function createBubble(x, y) {
+        const bubble = document.createElement('div');
+        const size = Math.random() * 100 + 30;
+        bubble.classList.add('trail-circle');
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${x - size / 2}px`;
+        bubble.style.top = `${(y - size / 2) - 70}px`;
+
+        // Append the bubble to the left section
+        leftSection.appendChild(bubble);
+
+        // Animate the bubble to rise slowly and disappear
+        setTimeout(() => {
+            bubble.style.transform = 'scale(1.1)';
+            bubble.style.opacity = '0';
+            bubble.style.top = `${parseFloat(bubble.style.top) - 60}px`; // Make the bubble rise
+        }, 10); // Slight delay to start the animation
+
+        // Remove the bubble after the animation
+        setTimeout(() => {
+            bubble.remove(); // Remove the bubble from the DOM
+        }, 7000); // Duration of the bubble before it's removed
+    }
+</script>
+
+</html>
+
+<style>
+    @font-face {
+        font-family: 'Nasalization';
+        src: url('fonts/nasalization-rg.otf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    @font-face {
+        font-family: 'Roboto';
+        src: url('fonts/Roboto-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    /* DASHBOARD */
+    header.dashboard {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: rgb(255, 255, 255);
+        color: black;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 100;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    header.dashboard .logo img {
+        width: 90px;
+        height: 75px;
+    }
+
+    header.dashboard .navigation ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    header.dashboard .navigation ul li {
+        margin-left: 20px;
+        display: inline-block;
+        padding-right: 40px;
+    }
+
+    header.dashboard .navigation ul li a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: 'Roboto', sans-serif;
+        padding: 10px 20px;
+        border: 2px solid black;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    header.dashboard .navigation ul li a:hover {
+        background-color: black;
+        color: white;
+    }
+
+    .container {
+        display: flex;
+        height: 100%;
+        width: 100%;
+    }
+
+    /* VIAL ON LEFT */
+    .left-section {
+        flex: 0.8;
+        background: linear-gradient(to bottom, #05ad2f, #31e810b8);
+        display: flex;
+        overflow: hidden;
+        position: relative;
+        border-left: 5px solid #454545;
+        border-right: 5px solid #454545;
+        border-bottom: 5px solid #454545;
+        border-top: 5px solid #454545;
+        padding-top: 100px;
+        transform: translateY(100px);
+        max-height: calc(100vh - 100px);
+        box-sizing: border-box;
+        border-bottom-left-radius: 10%;
+        border-bottom-right-radius: 10%;
+        border-top-left-radius: 9%;
+        border-top-right-radius: 9%;
+        position: relative;
+        max-width: 800px; 
+        width: 100%; 
+        margin: 0 auto;
+    }
+
+    .left-section::before,
+    .left-section::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        background-color: #5b5b5b;
+        border: 10px solid #454545;
+        border-radius: 25%;
+        box-shadow: inset 0px 7px 10px rgba(0, 0, 0, 0.3);
+        z-index: 2;
+    }
+
+    .left-section::before {
+        top: -30px;
+        height: 120px;
+        z-index: 7;
+    }
+
+    .left-section::after {
+        bottom: -70px;
+        height: 190px;
+        z-index: -1;
+    }
+
+    .left-section .green-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(34, 139, 34, 0.5);
+        z-index: 4;
+    }
+
+    .left-section .white-stripe {
+        position: absolute;
+        top: -15px;
+        left: 30%;
+        width: 50%;
+        height: 120%;
+        background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.811) 100%);
+        transform: rotate(30deg);
+        z-index: 3;
+    }
+
+    .left-section img {
+        width: 35vh;
+        height: auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scaleX(-1) scale(1.2);
+        z-index: 3;
+        animation: bob 4s ease-in-out infinite, teeter 6.5s ease-in-out infinite;
+    }
+
+    /* ANIMATIONS FOR VIAL */
+    @keyframes bob {
+
+        0%,
+        100% {
+            top: 50%;
+        }
+
+        50% {
+            top: 55%;
+        }
+    }
+
+    @keyframes teeter {
+
+        0%,
+        100% {
+            transform: translate(-50%, -50%) scaleX(-1) scale(1.2) rotate(0deg);
+        }
+
+        25% {
+            transform: translate(-50%, -50%) scaleX(-1) scale(1.2) rotate(-5deg);
+        }
+
+        75% {
+            transform: translate(-50%, -50%) scaleX(-1) scale(1.2) rotate(5deg);
+        }
+    }
+
+    .left-section .label {
+        position: absolute;
+        top: 500px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: 'Nasalization', sans-serif;
+        font-size: 48px;
+        color: black;
+        background-color: white;
+        padding: 10px 20px;
+        z-index: 10;
+        border: 2px solid black;
+        text-align: center;
+    }
+
+    .left-section .label .subtext {
+        font-family: 'Roboto', sans-serif;
+        font-size: 18px;
+        color: black;
+        margin-top: 5px;
+    }
+
+    .trail-circle {
+        position: absolute;
+        border: 10px solid rgb(109, 255, 31);
+        border-radius: 50%;
+        pointer-events: none;
+        opacity: 0.7;
+        transition: transform 2s ease-out, opacity 2s ease-out, top 2s ease-out;
+        z-index: 4;
+    }
+
+    /* FAQ ON RIGHT */
+    .right-section {
+        flex: 1.2;
+        padding: 40px;
+        padding-top: 100px;
+        background-color: white;
+        overflow-y: auto;
+    }
+
+    .faq-container {
+        color: black;
+    }
+
+    .faq-container h1 {
+        font-family: 'Nasalization', sans-serif;
+        font-size: 36px;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .faq-section {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: left;
+    }
+
+    .faq-item {
+        margin-bottom: 30px;
+    }
+
+    .faq-item h3 {
+        font-family: 'Roboto', sans-serif;
+        font-size: 24px;
+        color: #000;
+        margin-bottom: 10px;
+    }
+
+    .faq-item p {
+        font-size: 18px;
+        color: #000;
+    }
+</style>

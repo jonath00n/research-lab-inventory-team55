@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/green-logo.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <!-- DASHBOARD -->
+    <header class="dashboard">
+        <div class="logo">
+            <img src="images/texas-am-university-logo-black-and-white.png" alt="Logo">
+        </div>
+
+        <div class="center-image">
+            <a href="index.html">
+                <img src="images/green-logo.png" alt="Center Image">
+            </a>
+        </div>
+
+        <nav class="navigation">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="account.html">Account</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- SIDE BAR -->
+    <div class="management-container">
+        <div class="nav-bar">
+            <ul>
+                <li id="users-option">Users</li>
+                <li id="items-option">Items</li>
+                <li id="orders-option">Orders</li>
+            </ul>
+        </div>
+
+        <div class="content-area" id="content-area">
+            <h2>Select an option from the menu</h2>
+        </div>
+    </div>
+
+    <!-- ADD ITEMS -->
+    <div id="new-item-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-new-item-btn" class="close-btn">&times;</span>
+            <h2>New Item</h2>
+            <form id="new-item-form">
+                <div class="input-group">
+                    <label for="new-item-name">Name</label>
+                    <input type="text" id="new-item-name" name="name" placeholder="Enter item name">
+                </div>
+                <div class="input-group">
+                    <label for="new-item-description">Description</label>
+                    <input type="text" id="new-item-description" name="description"
+                        placeholder="Enter item description">
+                </div>
+                <div class="input-group">
+                    <label for="new-item-category">Category</label>
+                    <input type="text" id="new-item-category" name="category" placeholder="Enter item category">
+                </div>
+                <div class="input-group">
+                    <label for="new-item-quantity">Quantity</label>
+                    <input type="number" id="new-item-quantity" name="quantity" placeholder="Enter item quantity">
+                </div>
+                <div class="input-group">
+                    <label for="new-item-supplier">Supplier</label>
+                    <input type="text" id="new-item-supplier" name="supplier" placeholder="Enter item supplier">
+                </div>
+                <button type="submit" class="save-btn">Add Item</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT ITEMS -->
+    <div id="edit-item-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-edit-item-btn" class="close-btn">&times;</span>
+            <h2>Edit Item</h2>
+            <form id="edit-item-form">
+                <div class="input-group">
+                    <label for="edit-item-name">Name</label>
+                    <input type="text" id="edit-item-name" name="name" placeholder="Enter new name">
+                </div>
+                <div class="input-group">
+                    <label for="edit-item-description">Description</label>
+                    <input type="text" id="edit-item-description" name="description"
+                        placeholder="Enter new description">
+                </div>
+                <div class="input-group">
+                    <label for="edit-item-category">Category</label>
+                    <input type="text" id="edit-item-category" name="category" placeholder="Enter new category">
+                </div>
+                <div class="input-group">
+                    <label for="edit-item-quantity">Quantity</label>
+                    <input type="number" id="edit-item-quantity" name="quantity" placeholder="Enter new quantity">
+                </div>
+                <div class="input-group">
+                    <label for="edit-item-supplier">Supplier</label>
+                    <input type="text" id="edit-item-supplier" name="supplier" placeholder="Enter new supplier">
+                </div>
+                <button type="submit" class="save-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>
+
+
+<script>
+    let currentUserEmail = null;
+
+    // Check user permission on page load
+    async function checkPermission() {
+        try {
+            const response = await fetch('/current-user');
+            if (response.ok) {
+                const data = await response.json();
+                currentUserEmail = data.user.email;
+                const userPermission = data.user.permission;
+
+                // Redirect to index.html if user is not 'professor' or 'admin'
+                if (userPermission !== 'professor' && userPermission !== 'admin') {
+                    window.location.href = 'index.html';
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        } catch (error) {
+            console.error('Error checking permission:', error);
+            window.location.href = 'index.html';
+        }
+    }
+
+    window.onload = checkPermission;
+
+    // Function to fetch and display users with rented items
+    async function fetchUsers() {
+        try {
+            const response = await fetch('/current-user');
+            if (response.ok) {
+                const currentUserData = await response.json();
+                const currentUserPermission = currentUserData.user.permission;
+
+                const userResponse = await fetch('/users');
+                if (userResponse.ok) {
+                    const data = await userResponse.json();
+                    const contentArea = document.getElementById('content-area');
+                    contentArea.innerHTML = '<h2>Users</h2>';
+
+                    const table = document.createElement('table');
+                    table.classList.add('management-table');
+
+                    // Create table header
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        ${currentUserPermission === 'admin' ? '<th>Permission</th>' : ''}
+                        <th>Status</th>
+                        <th>Rented Items</th>
+                    </tr>`;
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement('tbody');
+                    data.users.forEach(user => {
+                        const row = document.createElement('tr');
+
+                        // Calculate days inactive
+                        const lastActiveMessage = calculateLastActiveMessage(user.last_logout);
+                        const isActive = user.email === currentUserData.user.email;
+
+                        // Create the status bubble
+                        const statusBubble = isActive
+                            ? `<span class="status-bubble active">Active</span>`
+                            : `<span class="status-bubble inactive">${lastActiveMessage}</span>`;
+
+                        // Render permission as text for the logged-in user, or a selector for others (only if admin)
+                        const permissionHtml = currentUserPermission === 'admin'
+                            ? (user.email === currentUserData.user.email
+                                ? `<td>${user.permission.charAt(0).toUpperCase() + user.permission.slice(1)}</td>`
+                                : `<td>
+                                <select class="permission-select" data-email="${user.email}">
+                                    <option value="student" ${user.permission === 'student' ? 'selected' : ''}>Student</option>
+                                    <option value="professor" ${user.permission === 'professor' ? 'selected' : ''}>Professor</option>
+                                    <option value="admin" ${user.permission === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </td>`)
+                            : '';
+
+                        // Generate rented items list or placeholder if empty
+                        const rentedItemsHtml = user.items_to_return && user.items_to_return.length > 0
+                            ? `<ul>${user.items_to_return.map(item => `<li>${item.name}: ${item.quantity}</li>`).join('')}</ul>`
+                            : `<p>No rented items</p>`;
+
+                        // Toggle button to show/hide rented items
+                        const rentedItemsToggle = `
+                    <button onclick="toggleRentedItems('${user.email}')" class="dropdown-btn">Show Rented Items</button>
+                    <div class="dropdown-content" id="dropdown-${user.email}" style="display: none;">
+                        ${rentedItemsHtml}
+                    </div>
+                `;
+
+                        // Append the row with user data, permission selector, status bubble, and rented items dropdown
+                        row.innerHTML = `
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        ${permissionHtml}
+                        <td>${statusBubble}</td>
+                        <td>${rentedItemsToggle}</td>`;
+
+                        tbody.appendChild(row);
+                    });
+
+                    table.appendChild(tbody);
+                    contentArea.appendChild(table);
+
+                    // Add event listeners to permission selectors if user is admin
+                    if (currentUserPermission === 'admin') {
+                        document.querySelectorAll('.permission-select').forEach(select => {
+                            select.addEventListener('change', async function () {
+                                const email = this.getAttribute('data-email');
+                                const newPermission = this.value;
+
+                                try {
+                                    const response = await fetch('/update-permission', {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ email, permission: newPermission })
+                                    });
+
+                                    if (response.ok) {
+                                        alert('Permission updated successfully.');
+                                    } else {
+                                        alert('Error updating permission.');
+                                    }
+                                } catch (error) {
+                                    console.error('Error updating permission:', error);
+                                }
+                            });
+                        });
+                    }
+                } else {
+                    alert('Error fetching users.');
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    }
+
+    // Function to toggle rented items display
+    function toggleRentedItems(email) {
+        const dropdown = document.getElementById(`dropdown-${email}`);
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function calculateLastActiveMessage(lastLogout) {
+        if (!lastLogout) {
+            return "Never logged out"; // If last_logout is null or empty (shouldn't happen but whatever)
+        }
+
+        // Manually parse the date in the expected format "YYYY-MM-DD HH:MM:SS"
+        const [datePart, timePart] = lastLogout.split(" ");
+        const [year, month, day] = datePart.split("-").map(Number);
+        const [hours, minutes, seconds] = timePart.split(":").map(Number);
+
+        // Create the date object with parsed values 
+        const lastLogoutDate = new Date(year, month - 1, day, hours, minutes, seconds);
+        const lastLoginDate = new Date(year, month - 1, day, hours, minutes, seconds);
+
+        if (isNaN(lastLogoutDate.getTime())) {
+            console.error(`Invalid date format for last_logout: ${lastLogout}`);
+            return "Date error"; // Handle invalid date format
+        }
+
+        // Calculate last active
+        const today = new Date();
+        const diffTime = today - lastLogoutDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // Convert ms to days
+        const todayCheck = lastLoginDate.getTime() - lastLogoutDate.getTime();
+
+        // Date differential display
+        if(todayCheck > 0) {
+            return "Active";
+        }else if (diffDays === 0) {
+            return "Last active within 24 hours";
+        } else if (diffDays === 1) {
+            return "Last active yesterday";
+        } else {
+            return `Last active ${diffDays} days ago`;
+        }
+    }
+
+    // Function to fetch and display items
+    async function fetchItems() {
+        try {
+            const response = await fetch('/items');
+            if (response.ok) {
+                const data = await response.json();
+                const contentArea = document.getElementById('content-area');
+
+                contentArea.innerHTML = `
+                    <h2>Items</h2>
+                    <button id="new-item-button" class="new-item-btn">+ New Item</button>
+                `;
+
+                // Render table of items w/ attributes
+                const table = document.createElement('table');
+                table.classList.add('management-table');
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Supplier</th>
+                    <th>Actions</th>
+                </tr>`;
+                table.appendChild(thead);
+
+                // Fill with gathered info
+                const tbody = document.createElement('tbody');
+                data.items.forEach(item => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.description}</td>
+                    <td>${item.category}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.supplier}</td>
+                    <td>
+                        <button onclick="openEditItemModal('${item.id}', '${item.name}', '${item.description}', '${item.category}', '${item.quantity}', '${item.supplier}')">✎</button>
+                        <button onclick="deleteItem('${item.id}')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                    tbody.appendChild(row);
+                });
+
+                table.appendChild(tbody);
+                contentArea.appendChild(table);
+
+                // Add event listener for the New Item button
+                document.getElementById('new-item-button').addEventListener('click', () => {
+                    document.getElementById("new-item-modal").style.display = "block";
+                });
+            } else {
+                alert('Error fetching items.');
+            }
+        } catch (error) {
+            console.error('Error fetching items:', error);
+        }
+    }
+
+    // Function to fetch and display orders
+    async function fetchOrders() {
+        try {
+            const response = await fetch('/orders');
+            if (response.ok) {
+                const data = await response.json();
+                const contentArea = document.getElementById('content-area');
+                contentArea.innerHTML = '<h2>Orders</h2>';
+
+                // Group orders by user_name, user_email, and timestamp
+                const ordersGrouped = data.orders.reduce((acc, order) => {
+                    const key = `${order.user_name}_${order.user_email}_${order.timestamp}`;
+                    if (!acc[key]) {
+                        acc[key] = [];
+                    }
+                    acc[key].push(order);
+                    return acc;
+                }, {});
+
+                // Iterate over the grouped orders and render them
+                for (const key in ordersGrouped) {
+                    const [userName, userEmail, timestamp] = key.split('_');
+                    const orderGroup = ordersGrouped[key];
+
+                    const orderTable = document.createElement('table');
+                    orderTable.classList.add('management-table');
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                    <tr>
+                        <th colspan="4">Order by ${userName} (${userEmail}) on ${new Date(timestamp).toLocaleString()}</th>
+                    </tr>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                    </tr>`;
+                    orderTable.appendChild(thead);
+
+                    // Render with gathered values
+                    const tbody = document.createElement('tbody');
+                    orderGroup.forEach(order => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${order.item_name}</td>
+                        <td>${order.quantity}</td>`;
+                        tbody.appendChild(row);
+                    });
+
+                    orderTable.appendChild(tbody);
+                    contentArea.appendChild(orderTable);
+
+                    //  Blank row for spacing
+                    const blankRow = document.createElement('div');
+                    blankRow.style.height = '40px';
+                    contentArea.appendChild(blankRow);
+                }
+            } else {
+                alert('Error fetching orders.');
+            }
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+        }
+    }
+
+
+    // Event listener for adding items
+    document.addEventListener('DOMContentLoaded', function () {
+        const newItemModal = document.getElementById("new-item-modal");
+        const closeNewItemBtn = document.getElementById("close-new-item-btn");
+
+        // Close modal when clicking the close button
+        closeNewItemBtn.onclick = function () {
+            newItemModal.style.display = "none";
+        };
+
+        // Close modal when clicking outside the modal
+        window.onclick = function (event) {
+            if (event.target === newItemModal) {
+                newItemModal.style.display = "none";
+            }
+        };
+
+        // Submit new item form
+        document.getElementById("new-item-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const newItemData = {
+                name: document.getElementById("new-item-name").value,
+                description: document.getElementById("new-item-description").value,
+                category: document.getElementById("new-item-category").value,
+                quantity: document.getElementById("new-item-quantity").value,
+                supplier: document.getElementById("new-item-supplier").value
+            };
+
+            try {
+                const response = await fetch("/add-item", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newItemData)
+                });
+
+                if (response.ok) {
+                    alert("New item added successfully.");
+                    fetchItems();
+                    newItemModal.style.display = "none";
+                } else {
+                    alert("Error adding new item.");
+                }
+            } catch (error) {
+                console.error("Error adding new item:", error);
+            }
+        });
+    });
+
+    // Event listener for updating item modal
+    document.addEventListener('DOMContentLoaded', function () {
+        const editItemModal = document.getElementById("edit-item-modal");
+        const closeEditItemBtn = document.getElementById("close-edit-item-btn");
+
+        // Function to open the modal and set item details
+        window.openEditItemModal = function (itemId, name, description, category, quantity, supplier) {
+            document.getElementById("edit-item-name").value = name;
+            document.getElementById("edit-item-description").value = description;
+            document.getElementById("edit-item-category").value = category;
+            document.getElementById("edit-item-quantity").value = quantity;
+            document.getElementById("edit-item-supplier").value = supplier;
+
+            // Set the itemId on the modal for reference
+            editItemModal.dataset.itemId = itemId;
+            editItemModal.style.display = "block";
+        };
+
+        closeEditItemBtn.onclick = function () {
+            editItemModal.style.display = "none";
+        };
+
+        window.onclick = function (event) {
+            if (event.target === editItemModal) {
+                editItemModal.style.display = "none";
+            }
+        };
+
+        // Submit updated item details
+        document.getElementById("edit-item-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const itemId = editItemModal.dataset.itemId;
+            const updatedData = {
+                name: document.getElementById("edit-item-name").value,
+                description: document.getElementById("edit-item-description").value,
+                category: document.getElementById("edit-item-category").value,
+                quantity: document.getElementById("edit-item-quantity").value,
+                supplier: document.getElementById("edit-item-supplier").value
+            };
+
+            try {
+                const response = await fetch("/update-item", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id: itemId, ...updatedData })
+                });
+
+                if (response.ok) {
+                    alert("Item updated successfully.");
+                    fetchItems();
+                    editItemModal.style.display = "none";
+                } else {
+                    alert("Error updating item.");
+                }
+            } catch (error) {
+                console.error("Error updating item:", error);
+            }
+        });
+    });
+
+
+    // Deleting items w/ confirmation
+    async function deleteItem(itemId) {
+        if (confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
+            try {
+                const response = await fetch(`/delete-item/${itemId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert("Item deleted successfully.");
+                    fetchItems();
+                } else {
+                    const errorData = await response.json();
+                    console.error("Error deleting item:", errorData.message);
+                    alert(`Error deleting item: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error("Error deleting item:", error);
+            }
+        }
+    }
+
+    // Add event listeners to navigation options
+    document.getElementById('users-option').addEventListener('click', fetchUsers);
+    document.getElementById('items-option').addEventListener('click', fetchItems);
+    document.getElementById('orders-option').addEventListener('click', fetchOrders);
+</script>
+
+
+<style>
+    @font-face {
+        font-family: 'Nasalization';
+        src: url('fonts/nasalization-rg.otf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    @font-face {
+        font-family: 'Roboto';
+        src: url('fonts/Roboto-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    body {
+        overflow-y: hidden;
+    }
+
+    .management-container {
+        display: flex;
+        height: 100vh;
+    }
+
+    /* DASHBOARD */
+    header.dashboard {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: rgb(255, 255, 255);
+        color: black;
+        position: relative;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    header.dashboard .center-image {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    header.dashboard .center-image img {
+        width: 80px;
+        height: auto;
+    }
+
+    .nav-bar {
+        width: 10%;
+        background-color: #f4f4f4;
+        padding: 20px;
+    }
+
+    .nav-bar ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .nav-bar ul li {
+        padding: 15px;
+        background-color: #333;
+        font-family: 'Roboto', sans-serif;
+        color: white;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .nav-bar ul li:hover {
+        background-color: #555;
+    }
+
+    .content-area {
+        width: 80%;
+        padding: 20px;
+        background-color: #fff;
+        overflow-y: auto;
+        max-height: 85vh;
+    }
+
+    .content-area h2 {
+        font-family: 'Nasalization', sans-serif;
+    }
+
+    /* TABLES */
+    .management-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .management-table th,
+    .management-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        font-family: 'Roboto', sans-serif;
+        text-align: left;
+    }
+
+    .management-table th {
+        background-color: #f4f4f4;
+        font-family: 'Nasalization', sans-serif;
+        font-weight: bold;
+    }
+
+    /* MODAL FOR EDIT */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: auto;
+        padding: 40px;
+        width: 30%;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .modal-content .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .modal-content .input-group label {
+        display: block;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .modal-content .input-group input {
+        width: 90%;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid black;
+        border-radius: 5px;
+    }
+
+    .save-btn {
+        width: 45%;
+        padding: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        background-color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .save-btn:hover {
+        background-color: gray;
+    }
+
+    /* ADD ITEM BUTTON */
+    .new-item-btn {
+        display: inline-block;
+        margin: 10px 0;
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        font-size: 16px;
+        font-family: 'Roboto', sans-serif;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .new-item-btn:hover {
+        background-color: #218838;
+    }
+
+
+    .modal-content .input-group label {
+        font-size: 16px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .modal-content .input-group input {
+        width: 90%;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    button:hover,
+    button:focus {
+        color: white;
+        cursor: pointer;
+    }
+
+    button {
+        font-size: 20px;
+        color: black;
+        border: 2px solid black;
+        border-radius: 5px;
+        background-color: white;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* STATUS BUBBLE */
+    .status-bubble {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .status-bubble.active {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .status-bubble.inactive {
+        background-color: #cccccc;
+        color: black;
+    }
+
+    /* DROPDOWN FOR RENTED ITEMS */
+    .dropdown-btn {
+        background-color: #9e9e9e;
+        color: white;
+        padding: 8px;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .dropdown-btn:hover {
+        background-color: #717070;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: relative;
+        background-color: #f9f9f9;
+        min-width: 200px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    .dropdown-content p,
+    .dropdown-content ul {
+        margin: 5px 0;
+    }
+
+    .dropdown-content ul {
+        list-style: none;
+        padding: 0;
+    }
+</style>

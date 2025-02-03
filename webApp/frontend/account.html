@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="images/green-logo.png" type="image/png">
 </head>
+
 <body>
+    <!-- DASHBOARD -->
     <header class="dashboard">
         <div class="logo">
             <img src="images/texas-am-university-logo-black-and-white.png" alt="Logo">
@@ -15,76 +19,111 @@
         <div class="center-image">
             <a href="index.html">
                 <img src="images/green-logo.png" alt="Center Image">
-            </a>            
+            </a>
         </div>
         <nav class="navigation">
             <ul>
                 <li><a href="index.html">Home</a></li>
+                <li><a href="management.html" id="management-option" style="display: none;">Management</a></li>
             </ul>
         </nav>
     </header>
 
     <section class="account-container">
+        <!-- USER ICON -->
         <div class="account-left">
-            <div class="user-icon-large" id="user-icon-large">
-                <!-- User's icon with the first letter of their name will be dynamically updated -->
-            </div>
+            <div class="user-icon-large" id="user-icon-large"></div>
         </div>
+
+        <!-- ACCOUNT INFORMATION -->
         <div class="account-right">
-            <h2>Account Details</h2>
+            <h2>Account Details <i id="edit-icon" class="fas fa-cog"></i></h2>
             <div class="account-details">
                 <p><strong>Name:</strong> <span id="user-name">Loading...</span></p>
                 <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
+                <p><strong>Permission:</strong> <span id="user-permission">Loading...</span></p>
+                <!--
                 <p><strong>Associated Labs:</strong></p>
-                <ul id="user-labs">
-                    <li>Loading...</li>
-                </ul>
+                    <ul>
+                        <li>
+                            <p>Fisher Engineering Design Center</p>
+                        </li>
+                    </ul>
+                -->
                 <button id="delete-account-btn" class="delete-btn">Delete Account</button>
             </div>
         </div>
     </section>
 
+    <!-- EDIT USER INFO MODAL -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Account</h2>
+            <form id="edit-form">
+                <div class="input-group">
+                    <label for="edit-name">Name</label>
+                    <input type="text" id="edit-name" name="name" placeholder="Enter new name">
+                </div>
+                <div class="input-group">
+                    <label for="edit-email">Email</label>
+                    <input type="email" id="edit-email" name="email" placeholder="Enter new email">
+                </div>
+                <button type="submit" class="save-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- COLOR PICKER -->
+    <div id="color-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-color-modal">&times;</span>
+            <h2>Select a Color</h2>
+            <div class="color-options">
+                <div class="color-circle" style="background-color: #ff0000;" data-color="#ff0000"></div>
+                <div class="color-circle" style="background-color: #ff9100;" data-color="#ff9100"></div>
+                <div class="color-circle" style="background-color: #ffff00;" data-color="#ffff00"></div>
+                <div class="color-circle" style="background-color: #00ff15;" data-color="#00ff15"></div>
+                <div class="color-circle" style="background-color: #1e00ff;" data-color="#1e00ff"></div>
+                <div class="color-circle" style="background-color: #8400ff;" data-color="#8400ff"></div>
+                <div class="color-circle" style="background-color: #e600ff;" data-color="#e600ff"></div>
+                <div class="color-circle" style="background-color: #f88abf;" data-color="#f88abf"></div>
+                <div class="color-circle" style="background-color: #500000;" data-color="#500000"></div>
+                <div class="color-circle" style="background-color: #6f6f6f;" data-color="#6f6f6f"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Function to fetch the current user's data
+        // Fetch the current user
         async function fetchCurrentUser() {
             try {
                 const response = await fetch('/current-user');
-
-                // If user is not authenticated, redirect them to home page
                 if (response.status === 401) {
                     window.location.href = 'index.html';
                     return;
                 }
-            
+
                 if (response.ok) {
                     const data = await response.json();
                     const userName = data.user.name;
                     const userEmail = data.user.email;
-                    const userLabs = data.user.labs || []; // Assuming an array for associated labs
-                
-                    // Display user's name and email
+                    const userColor = data.user.color;
+                    let userPermission = data.user.permission;
+
+                    // Show management option only for 'professor' or 'admin'
+                    if (userPermission === 'professor' || userPermission === 'admin') {
+                        document.getElementById('management-option').style.display = 'block';
+                    }
+
+                    // Capitalize the first letter of the permission field
+                    userPermission = userPermission.charAt(0).toUpperCase() + userPermission.slice(1);
+
                     document.getElementById('user-name').textContent = userName;
                     document.getElementById('user-email').textContent = userEmail;
-                
-                    // Populate associated labs
-                    const labsList = document.getElementById('user-labs');
-                    labsList.innerHTML = ''; // Clear loading text
-                    userLabs.forEach(lab => {
-                        const labItem = document.createElement('li');
-                        labItem.textContent = lab;
-                        labsList.appendChild(labItem);
-                    });
-                
-                    // Set the first letter of the user's name as the icon content
+                    document.getElementById('user-permission').textContent = userPermission;
+                    document.getElementById('user-icon-large').style.backgroundColor = userColor;
                     document.getElementById('user-icon-large').textContent = userName.charAt(0).toUpperCase();
-                
-                    // Add event listener for the delete account button
-                    document.getElementById('delete-account-btn').addEventListener('click', async () => {
-                        const confirmed = confirm("Are you sure you want to delete your account? This action is irreversible.");
-                        if (confirmed) {
-                            await deleteAccount(userEmail);
-                        }
-                    });
                 } else {
                     console.error('Error fetching user data');
                 }
@@ -93,40 +132,150 @@
             }
         }
 
-        // Function to delete the user's account
-        async function deleteAccount(email) {
+        // Establish better names for event listeners
+        const modal = document.getElementById("edit-modal");
+        const editIcon = document.getElementById("edit-icon");
+        const closeBtn = document.querySelector(".close");
+
+        // Open edit
+        editIcon.onclick = function () {
+            modal.style.display = "block";
+        };
+
+        // Close edit
+        closeBtn.onclick = function () {
+            modal.style.display = "none";
+        };
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        // Submit updated user details
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentName = document.getElementById('user-name').textContent;
+            const currentEmail = document.getElementById('user-email').textContent;
+
+            let newName = document.getElementById('edit-name').value;
+            let newEmail = document.getElementById('edit-email').value;
+
+            // Compare new names and new emails
+            if (!newName) {
+                newName = currentName;
+            }
+
+            if (!newEmail) {
+                newEmail = currentEmail;
+            }
+
+            // Try and update accordingly
             try {
-
-                const logoutResponse = await fetch('/sign-out', { method: 'POST' });
-                if (!logoutResponse.ok) {
-                    throw new Error('Failed to log out');
-                }
-
-                // 2. Redirect to index.html
-                window.location.href = 'index.html';
-
-                const response = await fetch('/delete-user', {
-                    method: 'DELETE',
+                const response = await fetch('/update-user', {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email })
+                    body: JSON.stringify({ name: newName, email: newEmail })
                 });
-            
+
                 if (response.ok) {
-                    alert('Account deleted successfully.');
+                    alert('Account updated successfully.');
+                    fetchCurrentUser();
+                    modal.style.display = 'none';
                 } else {
-                    console.error('Error deleting user');
+                    alert('Error updating account.');
                 }
             } catch (error) {
-                console.error('Error deleting account:', error);
+                console.error('Error updating account:', error);
             }
-        }
+        });
 
-        // Call the function to load user data when the page loads
+        // Open color selection modal when clicking on the user icon
+        document.getElementById('user-icon-large').onclick = function () {
+            document.getElementById('color-modal').style.display = 'block';
+        };
+
+        // Close the color modal when the close button is clicked
+        const closeColorModalBtn = document.querySelector('.close-color-modal');
+        closeColorModalBtn.onclick = function () {
+            document.getElementById('color-modal').style.display = 'none';
+        };
+
+        // Close the color modal when clicking outside the modal
+        window.onclick = function (event) {
+            const colorModal = document.getElementById('color-modal');
+            if (event.target === colorModal) {
+                colorModal.style.display = 'none';
+            }
+        };
+
+        // Event listeners to the color circles to change the user icon color and update in the database
+        document.querySelectorAll('.color-circle').forEach(circle => {
+            circle.addEventListener('click', async function () {
+                const selectedColor = this.getAttribute('data-color');
+                document.getElementById('user-icon-large').style.backgroundColor = selectedColor;
+
+                // Try to send color change request
+                try {
+                    const response = await fetch('/update-color', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ color: selectedColor })
+                    });
+
+                    if (response.ok) {
+                        console.log('User color updated successfully');
+                    } else {
+                        console.error('Error updating user color');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+
+                document.getElementById('color-modal').style.display = 'none';
+            });
+        });
+
+        // Delete user event listener
+        document.getElementById('delete-account-btn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                try {
+                    // Delete the user's account
+                    const currentEmail = document.getElementById('user-email').textContent;
+                    const deleteResponse = await fetch('/delete-user', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: currentEmail }),
+                    });
+
+                    if (deleteResponse.ok || deleteResponse.status === 404) {
+                        // Handle successful deletion or user already not found
+                        alert('Account deleted successfully.');
+                        window.location.href = 'index.html'; // Redirect to the homepage
+                    } else {
+                        // Handle other potential errors
+                        alert('Error deleting account.');
+                    }
+                } catch (error) {
+                    console.error('Error during account deletion process:', error);
+                }
+            }
+        });
+
+
+
         window.onload = fetchCurrentUser;
     </script>
 </body>
+
 </html>
 
 <style>
@@ -136,21 +285,22 @@
         font-weight: normal;
         font-style: normal;
     }
-    
+
     @font-face {
         font-family: 'Roboto';
         src: url('fonts/Roboto-Regular.ttf') format('truetype');
         font-weight: normal;
         font-style: normal;
     }
-    
+
     body {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
         background-color: white;
     }
-    
+
+    /* DASHBOARD */
     header.dashboard {
         display: flex;
         justify-content: space-between;
@@ -161,34 +311,37 @@
         position: relative;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-    
+
     header.dashboard .logo img {
         width: 90px;
         height: 75px;
     }
-    
+
     header.dashboard .center-image {
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
     }
-    
+
     header.dashboard .center-image img {
         width: 80px;
         height: auto;
     }
-    
+
     header.dashboard .navigation ul {
         list-style: none;
         margin: 0;
         padding: 0;
         display: flex;
+        justify-content: flex-start;
+        align-items: center;
     }
-    
+
     header.dashboard .navigation ul li {
         margin-left: 20px;
+        display: inline-block;
     }
-    
+
     header.dashboard .navigation ul li a {
         color: black;
         text-decoration: none;
@@ -199,18 +352,19 @@
         border-radius: 5px;
         transition: background-color 0.3s, color 0.3s;
     }
-    
+
     header.dashboard .navigation ul li a:hover {
         background-color: black;
         color: white;
         font-weight: bold;
         text-decoration: none;
     }
-    
+
+    /* ACCOUNT INFORMATION */
     section.account-container {
         display: flex;
         justify-content: space-between;
-        align-items: center; 
+        align-items: center;
         width: 80%;
         margin: 100px auto;
         padding: 40px;
@@ -218,65 +372,67 @@
         border-radius: 8px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-    
+
     section.account-container .account-left {
         flex-basis: 25%;
         display: flex;
-        justify-content: flex-start; 
-        align-items: center; 
+        justify-content: flex-start;
+        align-items: center;
     }
-    
+
     .user-icon-large {
-        width: 120px;
-        height: 120px;
+        width: 175px;
+        height: 175px;
         background-color: #6f6f6f;
         color: white;
-        font-size: 50px;
+        font-size: 100px;
         font-weight: bold;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: default;
+        -webkit-text-stroke-width: 3px;
+        -webkit-text-stroke-color: black;
     }
-    
+
     section.account-container .account-right {
         flex-basis: 70%;
     }
-    
+
     section.account-container h2 {
         font-family: 'Nasalization', sans-serif;
         font-size: 24px;
         margin-bottom: 20px;
     }
-    
+
     section.account-container .account-details p,
     section.account-container .account-details ul {
         font-family: 'Roboto', sans-serif;
         font-size: 16px;
         margin-bottom: 20px;
     }
-    
+
     section.account-container .account-details ul {
         list-style-type: disc;
         padding-left: 20px;
     }
 
+    /* USER ICON (LEFT) */
     .user-icon-large:hover {
         box-sizing: border-box;
-        width: 120px; 
-        border-radius: 50%; 
-        background-color: #6f6f6f; 
-        border: 8px solid rgba(255, 255, 255, 0.1); 
-
+        border-radius: 50%;
+        background-color: #6f6f6f;
+        border: 13px solid rgba(0, 0, 0, 0.5);
     }
 
     .user-icon-large:hover::after {
-        content: '✎';
-        font-size: 30px;
-        margin-left: 10px; 
+        content: '🎨';
+        font-size: 40px;
+        margin-left: 10px;
     }
 
+    /* DELETE BUTTON */
     .delete-btn {
         background-color: #e74c3c;
         color: white;
@@ -288,8 +444,164 @@
         transition: background-color 0.3s;
         margin-top: 20px;
     }
-    
+
     .delete-btn:hover {
         background-color: #c0392b;
+    }
+
+    /* SETTINGS */
+    .settings-icon {
+        position: absolute;
+        font-size: 24px;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        color: rgb(0, 0, 0);
+        z-index: 2;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    /* EDIT USER MODAL */
+    .modal-content {
+        background-color: white;
+        margin: auto;
+        padding: 40px;
+        width: 30%;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .modal-content h2 {
+        font-family: 'Nasalization', sans-serif;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .modal-content .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .modal-content .input-group label {
+        display: block;
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        margin-bottom: 8px;
+        padding-left: 10px;
+    }
+
+    .modal-content .input-group input {
+        width: 90%;
+        padding: 10px;
+        font-size: 16px;
+        font-family: 'Roboto', sans-serif;
+        border: 2px solid black;
+        border-radius: 5px;
+    }
+
+    .save-btn {
+        width: 45%;
+        padding: 10px;
+        font-size: 16px;
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold;
+        color: white;
+        background-color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .save-btn:hover {
+        background-color: gray;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    #edit-icon {
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    #edit-icon:hover {
+        color: gray;
+    }
+
+    /* COLOR PICKER MODAL */
+    #color-modal .modal-content {
+        background-color: white;
+        margin: auto;
+        padding: 40px;
+        width: 30%;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    #color-modal h2 {
+        font-family: 'Nasalization', sans-serif;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .color-options {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-gap: 20px;
+        justify-items: center;
+    }
+
+    .color-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid black;
+        transition: transform 0.3s ease;
+    }
+
+    .color-circle:hover {
+        transform: scale(1.1);
+    }
+
+    .close-color-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-color-modal:hover,
+    .close-color-modal:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
     }
 </style>
