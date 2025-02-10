@@ -11,6 +11,7 @@ import 'checkout_page.dart';
 class CheckoutListScreen extends StatefulWidget {
   final String searchQuery;
   CheckoutListScreen({required this.searchQuery});
+// search query is required and is what will be displayed
 
   @override
   _CheckoutListScreenState createState() => _CheckoutListScreenState();

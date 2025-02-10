@@ -19,7 +19,7 @@ String? userEmail;
 // This creates the AddComponentPage as a stateful widget
 // this means that it is able to be changed based on interaction or other events
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key}); // super.key identifies the key of the specific widget
   @override
   State<LoginPage> createState() => _LoginPageState();
 }

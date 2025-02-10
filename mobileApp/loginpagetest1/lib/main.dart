@@ -17,7 +17,7 @@ void main() {
 // This creates the MyApp as a stateful widget
 // this means that it is able to be changed based on interaction or other events
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key});// super.key identifies the key of the specific widget
 
   @override
   Widget build(BuildContext context) {

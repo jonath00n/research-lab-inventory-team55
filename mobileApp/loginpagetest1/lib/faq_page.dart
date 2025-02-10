@@ -11,7 +11,7 @@ import 'package:flutter_glow/flutter_glow.dart';
 // This creates the FAQPage as a stateful widget
 // this means that it is able to be changed based on interaction or other events
 class FAQPage extends StatefulWidget {
-  const FAQPage({super.key});
+  const FAQPage({super.key}); // super.key identifies the key of the specific widget
 
   @override
   State<FAQPage> createState() => _FAQState();

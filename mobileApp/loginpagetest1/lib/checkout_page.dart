@@ -15,7 +15,8 @@ class CheckoutPage extends StatefulWidget {
   final Map<String, dynamic> item;
 
   const CheckoutPage({Key? key, required this.item}) : super(key: key);
-
+// super.key identifies the key of the specific widget
+  // the item is passed as a key which sets attributes of the page
   @override
   _CheckoutPageState createState() => _CheckoutPageState();
 }

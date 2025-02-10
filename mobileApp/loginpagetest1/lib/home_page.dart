@@ -19,16 +19,15 @@ import 'package:image_picker/image_picker.dart';
 // This creates the HomePage as a stateful widget
 // this means that it is able to be changed based on interaction or other events
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-
-
+  const HomePage({super.key}); // super.key identifies the key of the specific widget
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 
-
+// The line below creates a class for the AddComponentPage
+// The underscore makes it private to the dart file (though this is unnecessary)
+// manages the State of the page and can rebuild the UI when needed
 class _HomePageState extends State<HomePage> {
   TextEditingController _searchController = TextEditingController();
   TextEditingController _searchDropdownController = TextEditingController();

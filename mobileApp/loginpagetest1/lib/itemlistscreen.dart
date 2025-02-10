@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'authentication_db.dart';
+// import 'authentication_db.dart';
 import 'home_page.dart';
 import 'checkout_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'external_database.dart'; // external database import for test
+
 // all packages and other pages referenced for this page ^
 
 // this item is the screen that displays the list of items
@@ -12,7 +14,7 @@ import 'package:google_fonts/google_fonts.dart';
 // this means that it is able to be changed based on interaction or other events
 class ItemsListScreen extends StatefulWidget {
   final String searchQuery;
-  ItemsListScreen({required this.searchQuery});
+  ItemsListScreen({required this.searchQuery}); // super.key identifies the key of the specific widget
 
   @override
   _ItemsListScreenState createState() => _ItemsListScreenState();
@@ -34,9 +36,9 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
     List<Map<String, dynamic>> results;
 
     if (query == "*") {
-      results = await AuthenticationDB().getItems();
+      results = await ExternalDatabase().getItems();
     } else {  // dropdown menus are no longer used
-      results = await AuthenticationDB().searchDropdownItems(query);
+      results = await ExternalDatabase().searchItems(query);
     }
 
     setState(() {
@@ -46,13 +48,11 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
 
   // not used currently
   Future<void> _loadItems() async {
-    final dbStuff = AuthenticationDB();
-    final data = await AuthenticationDB().getItems();
+    final database = ExternalDatabase();
+    final data = await database.getItems();
     setState(() {
       _items = data;
     });
-    _items = data;
-
   }
 
 
@@ -88,7 +88,7 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
                 (item) => DataRow(
               cells: [
                 DataCell(
-                  Text(item['item'],
+                  Text(item['Name'],
                     style: GoogleFonts.roboto(
                     fontSize: 15,
                   ),),
@@ -101,18 +101,20 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
                     );
                   },
                 ),
-                DataCell(Text(item['quantity']?.toString() ?? 'No Item', style: GoogleFonts.roboto(
+                DataCell(Text(item['Quantity']?.toString() ?? 'No Item', style: GoogleFonts.roboto(
                   fontSize: 15, // column for item quantity
                 ),)),
-                DataCell(Text(item['availability']?.toString() ?? '0', style: GoogleFonts.roboto(
-                  fontSize: 15, // column for item availability
-                ),)),
+                DataCell(
+                  Text(item['Availability']?.toString() ?? 'Unknown',
+                    style: GoogleFonts.roboto(fontSize: 15),
+                  ),
+                ),
               /*  DataCell(Text(item['returnable']?.toString() ?? '0', style: GoogleFonts.roboto(
                   fontSize: 15,
                 ),)), */
                 DataCell(  // column for the image of the item
                    Image.asset( // image is retrieved based on item name
-                       'assets/${item['item']}.png', // item images are pre loaded into the app
+                       'assets/${item['Name']}.png', // item images are pre loaded into the app
                          width: 80,
                          height: 30,
                            fit: BoxFit.cover,

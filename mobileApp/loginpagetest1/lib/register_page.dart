@@ -16,7 +16,7 @@ import 'package:flutter_glow/flutter_glow.dart';
 // This creates the RegisterPage as a stateful widget
 // this means that it is able to be changed based on interaction or other events
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+  const RegisterPage({super.key}); // super.key identifies the key of the specific widget
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
@@ -29,11 +29,14 @@ class _RegisterPageState extends State<RegisterPage> {
   // database stuff
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final AuthenticationDB dbStuff = AuthenticationDB();
 
   void _register() async {  // puts email and password entered into controllers
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
+    String name = _nameController.text.trim();
+
 
     if (await dbStuff.isUserExists(email)) { // if email already exists in table show error
       ScaffoldMessenger.of(context).showSnackBar(
@@ -46,7 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
       );
     }
     else {
-      int result = await dbStuff.registerUser(email, password); // registers user by calling function in database file
+      int result = await dbStuff.registerUser(email, password, name); // registers user by calling function in database file
       if (result != -1) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('User registered successfully!')),
@@ -92,6 +95,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.roboto(
                       fontSize: 20,
                     ),),
+
+                  const SizedBox(height: 20),
+                  Padding( // box for users to enter their email
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        border: Border.all(color: Colors.white),
+                      ),
+                      child: TextField( // uses the name controller to track
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(2.0),
+                          ),                           hintText: 'Name',
+                        ),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 20),
                   Padding( // box for users to enter their email
                     padding: const EdgeInsets.symmetric(horizontal: 40.0),

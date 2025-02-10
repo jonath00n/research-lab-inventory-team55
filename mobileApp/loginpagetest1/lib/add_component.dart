@@ -19,7 +19,7 @@ import 'package:email_validator/email_validator.dart';
 // This creates the AddComponentPage as a stateful widget
 // this means that it is able to be changed based on interaction or other events
 class AddComponentPage extends StatefulWidget {
-  const AddComponentPage({super.key});
+  const AddComponentPage({super.key}); // super.key identifies the key of the specific widget
   @override
   State<AddComponentPage> createState() => _AddComponentPageState();
 }

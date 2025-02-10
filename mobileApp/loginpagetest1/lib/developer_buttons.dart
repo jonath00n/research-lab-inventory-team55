@@ -20,7 +20,7 @@ import 'authentication_db.dart';
 // This creates the DeveloperPage as a stateful widget
 // this means that it is able to be changed based on interaction or other events
 class DeveloperPage extends StatefulWidget {
-  const DeveloperPage({super.key});
+  const DeveloperPage({super.key}); // super.key identifies the key of the specific widget
 
   @override
   State<DeveloperPage> createState() => _DeveloperState();
