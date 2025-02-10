@@ -6,8 +6,10 @@
     <title>Register</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="images/green-logo.png" type="image/png">
 </head>
 <body>
+    <!-- DASHBOARD -->
     <header class="dashboard">
         <div class="logo">
             <img src="images/texas-am-university-logo-black-and-white.png" alt="Logo">
@@ -24,6 +26,7 @@
         </nav>
     </header>
 
+    <!-- REGISTRATION FORM -->
     <section class="register-container">
         <h2>Register</h2>
         <form id="register-form">
@@ -49,11 +52,12 @@
     </section>
 
     <script>
+        // Event listener for 
         document.getElementById('register-form').addEventListener('submit', async function (event) {
-            event.preventDefault(); // Prevent the form from submitting normally
+            event.preventDefault(); 
 
             const fullname = document.getElementById('fullname').value;
-            const email = document.getElementById('email').value.trim(); // Trim spaces around the email
+            const email = document.getElementById('email').value.trim(); 
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
@@ -87,7 +91,7 @@
                 return;
             }
 
-            // Proceed to add user if email is not taken
+            // Add user
             const addUserResponse = await fetch('/add-user', {
                 method: 'POST',
                 headers: {
@@ -100,14 +104,15 @@
                 })
             });
 
+            // Final check for good registration
             const addUserData = await addUserResponse.json();
             if (addUserResponse.ok) {
                 alert("User registered successfully!");
-                document.getElementById('register-form').reset(); // Clear input fields
-                window.location.href = 'index.html'; // Redirect after successful registration
+                document.getElementById('register-form').reset(); 
+                window.location.href = 'index.html'; 
             } else {
                 alert(`Error: ${addUserData.error}`);
-                document.getElementById('register-form').reset(); // Clear input fields
+                document.getElementById('register-form').reset(); 
             }
         });
     </script>
@@ -136,6 +141,7 @@
         background-color: white;
     }
 
+    /* DASHBOARD */
     header.dashboard {
         display: flex;
         justify-content: space-between;
@@ -159,7 +165,7 @@
     }
 
     header.dashboard .center-image img {
-        width: 80px; /* Adjust the size as needed */
+        width: 80px;
         height: auto;
     }
 
@@ -189,9 +195,10 @@
         background-color: black;
         color: white;
         font-weight: bold;
-        text-decoration: none; /* Ensure there's no underline on hover */
+        text-decoration: none; 
     }
 
+    /* REGISTRATION FORM */
     section.register-container {
         width: 30%;
         margin: 100px auto;
