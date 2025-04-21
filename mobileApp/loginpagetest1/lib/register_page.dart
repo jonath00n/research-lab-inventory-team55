@@ -6,6 +6,8 @@ import 'login_page.dart';
 import 'authentication_db.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter_glow/flutter_glow.dart';
+import 'external_database.dart';
+import 'package:bcrypt/bcrypt.dart';
 // all packages and other pages referenced for this page ^
 
 
@@ -29,12 +31,14 @@ class _RegisterPageState extends State<RegisterPage> {
   // database stuff
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _password2Controller = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  final AuthenticationDB dbStuff = AuthenticationDB();
+  final ExternalDatabase dbStuff = ExternalDatabase();
 
   void _register() async {  // puts email and password entered into controllers
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
+    String password2 = _password2Controller.text.trim();
     String name = _nameController.text.trim();
 
 
@@ -48,8 +52,14 @@ class _RegisterPageState extends State<RegisterPage> {
         const SnackBar(content: Text('Use a Valid Email Address.')),
       );
     }
+    else if (password != password2) { // checks to see if the passwords are same
+      ScaffoldMessenger.of(context).showSnackBar( // displays an error if passwords are different
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+    }
     else {
-      int result = await dbStuff.registerUser(email, password, name); // registers user by calling function in database file
+      String encryptedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+      int result = await dbStuff.registerUser(email, encryptedPassword, name); // registers user by calling function in database file
       if (result != -1) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('User registered successfully!')),
@@ -155,6 +165,26 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 20),
 
+                  Padding( // text box for users to enter their password
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        border: Border.all(color: Colors.white),
+                      ),
+                      child: TextField(
+                        controller: _password2Controller, // uses password controller to track
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(2.0),
+                          ),                           hintText: 'Confirm Password',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
 
 
                   TextButton( // button that registeres the user based on credentials provided
@@ -204,12 +234,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
 
                   Container( // image
-                      height: 200,
-                      width: 200,
+                      height: 175,
+                      width: 175,
                       child: Image.asset( 'assets/green-logo.png', fit: BoxFit.cover)
                   ),
 
-                  const SizedBox(height: 135),
+                  const SizedBox(height: 100),
 
                   // button for deleting the database
                   // not meant to be in the final app

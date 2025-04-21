@@ -65,38 +65,52 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
       body: _items.isEmpty ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
         child: DataTable( // puts items in a data table format
-          columnSpacing: 15, // Reduces the space between columns
+          columnSpacing: 10, // Reduces the space between columns
           columns: [ // sets column names
             DataColumn(label: Text('Item',style: GoogleFonts.roboto(
               fontSize: 15,
             ),)),
-            DataColumn(label: Text('Quantity', style: GoogleFonts.roboto(
-              fontSize: 15,
-            ),)),
-            DataColumn(label: Text('Availability', style: GoogleFonts.roboto(
-              fontSize: 15,
-            ),)),
+            DataColumn(
+              label: Transform.translate(
+                offset: Offset(-15, 0), // shifts text 10 pixels to the left
+                child: Text('Quantity', style: GoogleFonts.roboto(fontSize: 15)),
+              ),
+            ),
+            DataColumn(
+              label: Transform.translate(
+                offset: Offset(-15, 0), // shifts text 10 pixels to the left
+                child: Text('Return?', style: GoogleFonts.roboto(fontSize: 15)),
+              ),
+            ),
+            DataColumn(
+              label: Transform.translate(
+                offset: Offset(-5, 0), // shifts text 10 pixels to the left
+                child: Text('Location', style: GoogleFonts.roboto(fontSize: 15)),
+              ),
+            ),
           /*  DataColumn(label: Text('Returnable?', style: GoogleFonts.roboto(
               fontSize: 15,
             ),)),  */
-            DataColumn(label: Text('Image', style: GoogleFonts.roboto(
+           /* DataColumn(label: Text('Image', style: GoogleFonts.roboto(
               fontSize: 15,
-            ),)),
+            ),)), */
           ],
           rows: _items // sets the rows for the columns
               .map(
                 (item) => DataRow(
               cells: [
                 DataCell(
-                  Text(item['Name'],
-                    style: GoogleFonts.roboto(
-                    fontSize: 15,
-                  ),),
+                  Container(
+                    width: 150, // Adjust this to increase space
+                    child: Text(item['Name'],
+                      style: GoogleFonts.roboto(fontSize: 15),
+                    ),
+                  ),
                   onTap: () {
                     Navigator.push(  // this column is tappable
                       context, // it will send you to the associated item checkout screen
                       MaterialPageRoute(
-                        builder: (context) => CheckoutPage(item: item),
+                        builder: (context) => CheckoutPage(itemId: item['Id']),
                       ),
                     );
                   },
@@ -105,14 +119,20 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
                   fontSize: 15, // column for item quantity
                 ),)),
                 DataCell(
-                  Text(item['Availability']?.toString() ?? 'Unknown',
+                  Text(
+                    item['returnable'] == 1 ? 'YES' : 'NO',
+                    style: GoogleFonts.roboto(fontSize: 15),
+                  ),
+                ),
+                DataCell(
+                  Text(item['Location']?.toString() ?? 'Unknown',
                     style: GoogleFonts.roboto(fontSize: 15),
                   ),
                 ),
               /*  DataCell(Text(item['returnable']?.toString() ?? '0', style: GoogleFonts.roboto(
                   fontSize: 15,
                 ),)), */
-                DataCell(  // column for the image of the item
+               /* DataCell(  // column for the image of the item
                    Image.asset( // image is retrieved based on item name
                        'assets/${item['Name']}.png', // item images are pre loaded into the app
                          width: 80,
@@ -129,7 +149,7 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
 
 
                    )
-                ),
+                ), */
               ],
             ),
           )

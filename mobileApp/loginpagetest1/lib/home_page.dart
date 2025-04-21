@@ -9,6 +9,12 @@ import 'login_page.dart';
 import 'faq_page.dart';
 import 'package:flutter_glow/flutter_glow.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
+
 // all packages and other pages referenced for this page ^
 
 
@@ -37,6 +43,47 @@ class _HomePageState extends State<HomePage> {
 // function to open the camera
   Future<void> _openCamera() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      File imageFile = File(image.path);
+      await _sendImage(imageFile);
+    }
+  }
+
+  Future<void> _sendImage(File imageFile) async {
+    // String flaskUrl = 'http://10.0.2.2:5001/predict';
+    String flaskUrl = 'http://10.246.178.214:5001/predict';
+    // String flaskUrl = 'http://192.168.1.100:5001/predict';
+
+
+
+    try {
+      List<int> imageBytes = await imageFile.readAsBytes();
+      String base64Image = base64Encode(imageBytes);
+
+      // Send as JSON
+      var response = await http.post(
+        Uri.parse(flaskUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"image": base64Image}),
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var jsonResponse = json.decode(response.body);
+        print('Prediction: ${jsonResponse['item']}');
+        String predictedItem = jsonResponse['item'];
+        _searchController.text = predictedItem;
+        _performCameraSearch();
+
+      } else {
+        print('Error uploading image: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Exception: $e');
+    }
+
   }
 
 // performs a search of the items with the name that is entered in the search box
@@ -53,6 +100,21 @@ class _HomePageState extends State<HomePage> {
       );
     }
   }
+
+  void _performCameraSearch() {
+    String query = _searchController.text;
+    if (query.isNotEmpty) {
+      // Navigate to SearchResultPage and pass the search query
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ItemsListScreen(searchQuery: query),
+        ),
+      );
+    }
+  }
+
+
 
   // performs a search of all of the items
   void _performAllSearch() {
@@ -106,6 +168,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.grey[200],
+        resizeToAvoidBottomInset: false,
+
         body: SafeArea(
             child: Center(
                 child: Column(children: [
@@ -122,7 +186,7 @@ class _HomePageState extends State<HomePage> {
 
                   GestureDetector // makes it so that you can click on the image to go to the developer page
                     (
-                    onTap: () {
+                   /* onTap: () {
                       // Navigate to CheckoutPage with the selected item
                       Navigator.push(
                         context,
@@ -130,7 +194,7 @@ class _HomePageState extends State<HomePage> {
                           builder: (context) => DeveloperPage(),
                         ),
                       );
-                    },
+                    }, */
                     child: Container(
                         height: 200,
                         width: 200,

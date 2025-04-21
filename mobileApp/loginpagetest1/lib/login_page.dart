@@ -5,6 +5,9 @@ import 'register_page.dart';
 import 'authentication_db.dart';
 import 'faq_page.dart';
 import 'package:flutter_glow/flutter_glow.dart';
+import 'external_database.dart';
+import 'package:bcrypt/bcrypt.dart';
+
 // all packages and other pages referenced for this page ^
 
 
@@ -34,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
   // controllers for tracking email and password
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthenticationDB dbStuff = AuthenticationDB(); // makes it easy to use database functions
+  final ExternalDatabase dbStuff = ExternalDatabase(); // makes it easy to use database functions
 
   void _login() async {
     // sets the controllers to the text entered
@@ -190,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
         const SizedBox(height: 110),
 
 
-        TextButton(
+        /* TextButton(
           child: Container(  // button to send the user to the FAQ page
             padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
@@ -213,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                 MaterialPageRoute(builder: (context) => const FAQPage())
             );
           },
-        ),
+        ), */
 
 
 

@@ -1,190 +1,162 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'authentication_db.dart';
 import 'itemlistscreen.dart';
 import 'home_page.dart';
-import 'login_page.dart';
 import 'package:flutter_glow/flutter_glow.dart';
-import 'external_database.dart';
-import 'package:mysql1/mysql1.dart';
-import 'login_page.dart';
-
-
 // all packages and other pages referenced for this page ^
 
 
 
 // This creates the CheckoutPage as a stateful widget
 // this means that it is able to be changed based on interaction or other events
-class CheckoutPage extends StatefulWidget {
-  // final Map<String, dynamic> item;
-  final int itemId;
-  const CheckoutPage({Key? key, required this.itemId}) : super(key: key);
+class SpecifyPage extends StatefulWidget {
+  final Map<String, dynamic> item;
 
-
-  // const CheckoutPage({Key? key, required this.item}) : super(key: key);
+  const SpecifyPage({Key? key, required this.item}) : super(key: key); // may keep or change
 // super.key identifies the key of the specific widget
   // the item is passed as a key which sets attributes of the page
   @override
-  _CheckoutPageState createState() => _CheckoutPageState();
+  _SpecifyPageState createState() => _SpecifyPageState();
 }
 
 
 // The line below creates a class for the CheckoutPage
 // The underscore makes it private to the dart file (though this is unnecessary)
 // manages the State of the page and can rebuild the UI when needed
-class _CheckoutPageState extends State<CheckoutPage> {
+class _SpecifyPageState extends State<SpecifyPage> {
   // controllers are used to track quantity entered, email is no longer tracked this way
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  // makes it easier to use database functions
-  // final AuthenticationDB dbStuff = AuthenticationDB();
-  // sets the acknowledgement check box variable
-  bool _acknowledgement = false;
+  final TextEditingController _valueController = TextEditingController();
 
-  String _itemName = '';
-  String _Supplier = '';
-  int _quantityAvailable = 0;
-  bool _returnable = false;
-  bool _isLoading = true;
+  void _identifyItem() async {
+    // sets old and new quantity
+    String itemName = widget.item['quantity'] ?? "";
+    int itemValue = int.tryParse(_valueController.text) ?? 0;
 
-  final String email = userEmail!; // Replace with actual user session email
-
-  // Fetch item data by ID
-  Future<void> _fetchItemData() async {
-    ExternalDatabase db = ExternalDatabase();
-    List<Map<String, dynamic>> items = await db.getItems();
-
-    // Adjust the correct key for ID, make sure it's capital 'Id'
-    Map<String, dynamic>? item = items.firstWhere(
-          (element) => element['Id'] == widget.itemId, // Ensure 'Id' matches database column
-      orElse: () => {},
-    );
-
-    if (item.isNotEmpty) {
-      setState(() {
-        _itemName = item['Name'];
-        _quantityAvailable = item['Quantity'];
-        _returnable = item['returnable'] == 1;
-        _Supplier = item['Supplier'];
-        _isLoading = false;
-      });
-    } else {
+    // Validate input quantity
+    if (itemValue <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Item not found')),
+        SnackBar(content: Text('Please enter a valid value')),
       );
-      Navigator.pop(context);
+      return;
     }
+    // makes sure that the acknowledgement is checked
+
+    // Calculate the new quantity
+
+
+
+    int result = await AuthenticationDB().updateItemQuantity(itemId, newQuantity);
+    if (returnable == 1) {
+      _addCheckoutList(); // Call add to checkout list function
+    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()), // sends to home page
+    );
   }
-
-
-
-
-
   // checkout function
   void _checkoutItem() async {
+    // sets old and new quantity
     int checkoutQuantity = int.tryParse(_quantityController.text) ?? 0;
+    int currentQuantity =  int.tryParse(widget.item['quantity']) ?? 0;
+    int returnable = widget.item['returnable'] ?? 0;
 
-    // Validation
-    if (checkoutQuantity <= 0 || checkoutQuantity > _quantityAvailable) {
+    // Validate input quantity
+    if (checkoutQuantity <= 0 || checkoutQuantity > currentQuantity) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter a valid quantity')),
       );
       return;
     }
-    if (!_acknowledgement & (_returnable == true)) {
+    // makes sure that the acknowledgement is checked
+    if (_acknowledgement == false) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please check the user acknowledgement')),
+        SnackBar(content: Text('Please check the user acknowlegement')),
       );
       return;
     }
 
-    int newQuantity = _quantityAvailable - checkoutQuantity;
-
-    // Update item quantity in DB
-    await ExternalDatabase().updateItemQuantity(widget.itemId, newQuantity);
-
-    await ExternalDatabase().addOrdersList(
-      widget.itemId,
-      _itemName,
-      email,
-      checkoutQuantity,
-    );
-
-    // If returnable, add to checkout list (returns table)
-    if (_returnable) {
-      await ExternalDatabase().addCheckoutList(
-        widget.itemId,
-        _itemName,
-        email,
-        checkoutQuantity,
-      );
+    // Calculate the new quantity
+    int newQuantity = currentQuantity - checkoutQuantity;
+    int itemId = widget.item['id2'];
+    int result = await AuthenticationDB().updateItemQuantity(itemId, newQuantity);
+    if (returnable == 1) {
+      _addCheckoutList(); // Call add to checkout list function
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Item checked out successfully')),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()), // sends to home page
     );
-
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
   }
-
 
   // function to check in an item
   void _checkInItem() async {
-
-    if (_returnable == false) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Item Cannot be Returned')),
-      );
-      return;
-    }
-
+    // sets old quantity from table
     int checkInQuantity = int.tryParse(_quantityController.text) ?? 0;
+    int currentQuantity =  int.tryParse(widget.item['quantity']) ?? 0;
 
-    if (checkInQuantity <= 0) {
+    // Validate input quantity
+    if (checkInQuantity <= 0 ) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid quantity')),
+        SnackBar(content: Text('Please enter a valid item and quantity')),
       );
       return;
     }
 
-    int newQuantity = _quantityAvailable + checkInQuantity;
-
-    // Update item quantity in DB
-    await ExternalDatabase().updateItemQuantity(widget.itemId, newQuantity);
-
-    // If returnable, subtract from checkout list (returns table)
-    if (_returnable) {
-      int result = await ExternalDatabase().subtractCheckoutList(
-        widget.itemId,
-        _itemName,
-        email,
-        checkInQuantity,
-      );
-
-      if (result == -1) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cannot check in more than checked out.')),
-        );
-        return;
-      }
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Item checked in successfully')),
+    // Calculate the new quantity
+    int newQuantity = currentQuantity + checkInQuantity;
+    int itemId = widget.item['id2']; //
+    int result = await AuthenticationDB().updateItemQuantity(itemId, newQuantity);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()), // sends to home page
     );
-
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
   }
 
+  // adds an entry to active checkout list
+  void _addCheckoutList() async {
+
+    String item = widget.item['item'];
+    String quantity = _quantityController.text.trim();
+
+    int result = await dbStuff.addCheckoutList(item, quantity);
+    // displays whether this was successful
+    if (result != -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Checkout User added successfully!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Addition failed.')),
+      );
+    }
+  }
 
   // subtracts from active checkout list if an item is checked back in
+  void _subtractCheckoutList() async {
+    int returnable = widget.item['returnable'] ?? 0;
+    if (returnable == 1) {
+      String item = widget.item['item'];
+      String quantity = _quantityController.text.trim();
 
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchItemData();
+      int result = await dbStuff.subtractCheckoutList(item, quantity);
+      if (result != -1) {
+        _checkInItem(); // calls check in function
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Check In User added successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Enter valid Item and Quantity')),
+        );
+      }
+    }
+    else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Item is not returnable')),
+      );
+    }
   }
 
   // This builds the widget that is the UI for this page
@@ -193,8 +165,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      resizeToAvoidBottomInset: false,
-
 
       // padding and other functions makes UI look better
       body: Padding(
@@ -211,18 +181,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
             const SizedBox(height: 10),
 
-            Text('Item: $_itemName', style: GoogleFonts.roboto(fontSize: 20)),
+            Text('Item: ${widget.item['item']}', style: GoogleFonts.roboto(
+              fontSize: 20,
+            ),),
             SizedBox(height: 10),
-            Text('Quantity Available: $_quantityAvailable',
-                style: GoogleFonts.roboto(fontSize: 20)),
+            Text('Quantity Available: ${widget.item['quantity']}', style: GoogleFonts.roboto(
+              fontSize: 20,
+            ),),
             SizedBox(height: 10),
-            Text('Returnable: ${_returnable ? "Yes" : "No"}',
-                style: GoogleFonts.roboto(fontSize: 20)),
+            Text('Available for Checkout?: ${widget.item['availability']}', style: GoogleFonts.roboto(
+              fontSize: 20,
+            ),),
             SizedBox(height: 10),
-
-            Text('Supplier: $_Supplier', style: GoogleFonts.roboto(fontSize: 20)),
-            SizedBox(height: 10),
-
 
             // box to enter the desired quantity
             Padding(
@@ -264,7 +234,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),),
               onPressed: () {
                 _checkoutItem();  // Call the check-out function
-               // _addCheckoutList();  // Call the add-to-checkout-list function
+                // _addCheckoutList();  // Call the add-to-checkout-list function
               },
 
             ),
@@ -285,8 +255,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       )),
                 ),),
               onPressed: () {
-                _checkInItem();
-             //   _subtractCheckoutList();// also checks in item
+                //   _checkInItem();
+                _subtractCheckoutList();// also checks in item
               },
 
             ),
@@ -356,7 +326,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ),
             ),
-            //
+            // b90953c3149805219d27829ccc85c79c.png
 
 
 
@@ -366,3 +336,4 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 }
+*/
