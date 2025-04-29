@@ -24,7 +24,6 @@ class ExternalDatabase {
       var results = await conn.query('SELECT * FROM users');
       return results.map((r) => r.fields).toList();
     } catch (e) {
-      print("Error fetching users: $e");
       return [];
     } finally {
       await conn?.close();
@@ -44,7 +43,6 @@ class ExternalDatabase {
 
       return itemList;
     } catch (e) {
-      print("Error fetching items: $e");
       return [];
     } finally {
       await conn?.close();
@@ -63,7 +61,6 @@ class ExternalDatabase {
       );
       return results.map((r) => r.fields).toList();
     } catch (e) {
-      print("Error searching items: $e");
       return [];
     } finally {
       await conn?.close();
@@ -78,7 +75,6 @@ class ExternalDatabase {
       var results = await conn.query('SELECT * FROM Orders');
       return results.map((r) => r.fields).toList();
     } catch (e) {
-      print("Error fetching orders: $e");
       return [];
     } finally {
       await conn?.close();
@@ -99,7 +95,6 @@ class ExternalDatabase {
 
       return count > 0;
     } catch (e) {
-      print("Error checking user existence: $e");
       return false;
     } finally {
       await conn?.close();
@@ -119,7 +114,7 @@ class ExternalDatabase {
 
       return result.insertId ?? -1;
     } catch (e) {
-      print("Error registering user: $e");
+
       return -1;
     } finally {
       await conn?.close();
@@ -142,7 +137,7 @@ class ExternalDatabase {
       String encryptedPassword = results.first.fields['password'];
       return BCrypt.checkpw(password, encryptedPassword);
     } catch (e) {
-      print("Error logging in: $e");
+
       return false;
     } finally {
       await conn?.close();
@@ -164,7 +159,7 @@ class ExternalDatabase {
 
       return result.affectedRows ?? 0; // Returns how many rows were affected
     } catch (e) {
-      print("Error updating item quantity: $e");
+      print("Error updating item quantity");
       return 0; // Return 0 if update failed
     } finally {
       await conn?.close();
@@ -205,21 +200,20 @@ class ExternalDatabase {
       } else {
         // If not exists, insert new entry
         var insertResult = await conn.query(
-          'INSERT INTO returns (item_id, item_name, email, quantity) VALUES (?, ?, ?, ?)',
+          'INSERT INTO returns (item_id, item_name, email, quantity, check_out_date) VALUES (?, ?, ?, ?, NOW())',
           [itemId, itemName, email, quantity],
         );
 
         return insertResult.insertId ?? -1;
       }
     } catch (e) {
-      print("Error adding to checkout list: $e");
       return -1;
     } finally {
       await conn?.close();
     }
   }
 
-  Future<int> addOrdersList(int itemId, String itemName, String email, int quantity) async {
+  Future<int> addOrdersList(int itemId, bool returnable, String itemName, String email, int quantity, String userName) async {
     MySqlConnection? conn;
     try {
       conn = await MySqlConnection.connect(settings);
@@ -228,15 +222,14 @@ class ExternalDatabase {
 
 
         // If not exists, insert new entry
-        var insertResult = await conn.query(
-          'INSERT INTO orders (item_id, item_name, user_email, quantity) VALUES (?, ?, ?, ?)',
-          [itemId, itemName, email, quantity],
-        );
+      var insertResult = await conn.query(
+        'INSERT INTO orders (item_id, returnable, item_name, user_email, quantity, user_name, timestamp) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+        [itemId, returnable, itemName, email, quantity, userName],
+      );
 
         return insertResult.insertId ?? -1;
 
     } catch (e) {
-      print("Error adding to checkout list: $e");
       return -1;
     } finally {
       await conn?.close();
@@ -247,6 +240,8 @@ class ExternalDatabase {
     MySqlConnection? conn;
     try {
       conn = await MySqlConnection.connect(settings);
+
+
 
       // Check if entry exists
       var existing = await conn.query(
@@ -281,7 +276,6 @@ class ExternalDatabase {
         return -1;
       }
     } catch (e) {
-      print("Error subtracting from checkout list: $e");
       return -1;
     } finally {
       await conn?.close();
@@ -298,7 +292,6 @@ class ExternalDatabase {
       );
       return result.isNotEmpty && result.first['returnable'] == 1;
     } catch (e) {
-      print('Error checking returnable status: $e');
       return false;
     } finally {
       await conn?.close();
@@ -319,7 +312,6 @@ class ExternalDatabase {
         return 0;
       }
     } catch (e) {
-      print('Error fetching checked-out quantity: $e');
       return 0;
     } finally {
       await conn?.close();

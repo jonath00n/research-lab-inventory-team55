@@ -104,11 +104,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
     // Update item quantity in DB
     await ExternalDatabase().updateItemQuantity(widget.itemId, newQuantity);
 
+    String userName = 'USER';
+    try {
+      var users = await ExternalDatabase().getUsers();
+      var user = users.firstWhere((u) => u['email'] == email, orElse: () => {});
+      if (user.isNotEmpty && user.containsKey('name')) {
+        userName = user['name'];
+      } else {
+        print("No user found with email $email or missing name column.");
+      }
+    } catch (e) {
+      print("Error fetching user name: $e");
+    }
+
     await ExternalDatabase().addOrdersList(
       widget.itemId,
+      _returnable,
       _itemName,
       email,
       checkoutQuantity,
+      userName,
     );
 
     // If returnable, add to checkout list (returns table)

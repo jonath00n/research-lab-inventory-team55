@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _sendImage(File imageFile) async {
     // String flaskUrl = 'http://10.0.2.2:5001/predict';
-    String flaskUrl = 'http://10.246.178.214:5001/predict';
+    String flaskUrl = 'http://10.246.83.216:5001/predict';
     // String flaskUrl = 'http://192.168.1.100:5001/predict';
 
 
