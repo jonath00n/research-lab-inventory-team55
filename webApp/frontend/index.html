@@ -382,10 +382,8 @@
             const selectedSupplier = document.getElementById('supplier-filter').value;
         
             const filteredItems = allItems.filter(item => {
-                // Check if the item name matches the search query
                 const matchesSearch = item.name.toLowerCase().includes(searchValue);
         
-                // Check if the item matches the selected filters
                 const matchesCategory = selectedCategory === "all" || item.categoryID === selectedCategory;
                 const matchesUnit = selectedUnit === "all" || item.unit === selectedUnit;
                 const matchesLocation = selectedLocation === "all" || item.location === selectedLocation;

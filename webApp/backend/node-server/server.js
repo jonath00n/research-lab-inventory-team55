@@ -266,7 +266,7 @@ app.get('/management.html', (req, res) => {
     if (req.session.user && (req.session.user.permission === 'professor' || req.session.user.permission === 'admin')) {
         res.sendFile(path.join(__dirname, '../../frontend/management.html'));
     } else {
-        res.redirect('/index.html'); // Redirect unauthorized users to index.html
+        res.redirect('/index.html'); 
     }
 });
 
@@ -278,7 +278,6 @@ app.get('/cart', (req, res) => {
 
     const email = req.session.user.email;
 
-    // Join cart with items to fetch item_name and returnable status
     const query = `
         SELECT cart.item_id, items.name AS item_name, cart.quantity, items.returnable
         FROM cart
@@ -326,7 +325,6 @@ app.post('/add-to-cart', (req, res) => {
         }
 
         if (results.length > 0) {
-            // Item exists, update quantity
             db.query(
                 "UPDATE cart SET quantity = quantity + ? WHERE email = ? AND item_id = ?", 
                 [quantity, email, item_id], 
@@ -339,7 +337,6 @@ app.post('/add-to-cart', (req, res) => {
                 }
             );
         } else {
-            // Insert new item into the cart
             db.query(
                 "INSERT INTO cart (email, item_id, quantity) VALUES (?, ?, ?)", 
                 [email, item_id, quantity], 
