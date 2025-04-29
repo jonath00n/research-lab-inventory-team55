@@ -168,11 +168,6 @@ section.banner .overlay-text {
     gap: 20px; 
 }
 
-.filter-container .filter {
-    flex: 1; 
-    min-width: 200px; 
-}
-
 .search-bar::placeholder {
     color: gray;
     font-style: italic;
@@ -403,8 +398,8 @@ section.information .info-image img {
 
 #cart-count {
     position: absolute;
-    top: 0px;
-    right: -10px;
+    top: -15px;
+    right: -20px;
     background-color: green;
     color: white;
     border-radius: 50%;
@@ -573,4 +568,80 @@ button:hover, input[type="checkbox"]:hover {
     cursor: not-allowed;
     color: #888;
     background-color: #ddd;
+}
+
+/* CART ITEM */
+.cart-item {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.cart-item-name {
+    font-size: 16px;
+    font-weight: bold;
+    flex-grow: 1; 
+    text-align: left;
+}
+
+.quantity-input {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    padding: 5px 10px;
+    border: 2px solid black;
+    border-radius: 5px;
+    width: 60px;
+    text-align: center;
+    background-color: white;
+    margin-left: auto; 
+}
+
+.remove-cart-item {
+    color: red;
+    font-size: 22px; 
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+    margin-left: 15px; 
+}
+
+.remove-cart-item:hover {
+    color: darkred;
+}
+
+/* FILTER DROPDOWNS */
+thead select {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    padding: 6px 10px;
+    border: 2px solid black;
+    font-weight: bold;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+thead select:hover {
+    background-color: #f0f0f0;
+    border-color: black;
+}
+
+#reset-filters-btn {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    padding: 6px 12px;
+    padding-bottom: 10px;
+    border: 2px solid black;
+    border-radius: 5px;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+#reset-filters-btn:hover {
+    background-color: black;
+    color: grey;
 }

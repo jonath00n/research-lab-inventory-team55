@@ -42,14 +42,6 @@
                 <p><strong>Name:</strong> <span id="user-name">Loading...</span></p>
                 <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
                 <p><strong>Permission:</strong> <span id="user-permission">Loading...</span></p>
-                <!--
-                <p><strong>Associated Labs:</strong></p>
-                    <ul>
-                        <li>
-                            <p>Fisher Engineering Design Center</p>
-                        </li>
-                    </ul>
-                -->
                 <button id="delete-account-btn" class="delete-btn">Delete Account</button>
             </div>
         </div>
@@ -259,7 +251,7 @@
                     if (deleteResponse.ok || deleteResponse.status === 404) {
                         // Handle successful deletion or user already not found
                         alert('Account deleted successfully.');
-                        window.location.href = 'index.html'; // Redirect to the homepage
+                        window.location.href = 'index.html'; 
                     } else {
                         // Handle other potential errors
                         alert('Error deleting account.');

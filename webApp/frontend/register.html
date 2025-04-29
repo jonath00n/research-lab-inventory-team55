@@ -52,69 +52,68 @@
     </section>
 
     <script>
-        // Event listener for 
+        // Event listener for form
         document.getElementById('register-form').addEventListener('submit', async function (event) {
-            event.preventDefault(); 
-
+            event.preventDefault();
+        
             const fullname = document.getElementById('fullname').value;
             const email = document.getElementById('email').value.trim(); 
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-
-            // Check if passwords match
+        
             if (password !== confirmPassword) {
                 alert("Passwords do not match!");
                 return;
             }
-
-            // Email validation regex pattern (RFC 5322)
+        
             const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
             if (!emailPattern.test(email)) {
                 alert("Please enter a valid email address.");
                 return;
             }
-
-            // Check if email is already used
+        
             const response = await fetch('/check-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email: email })
+                body: JSON.stringify({ email })
             });
-
+        
             const data = await response.json();
-
             if (data.exists) {
                 alert("Email is already registered.");
                 return;
             }
-
-            // Add user
+        
             const addUserResponse = await fetch('/add-user', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: fullname,
-                    email: email,
-                    password: password
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: fullname, email, password })
             });
-
-            // Final check for good registration
+        
             const addUserData = await addUserResponse.json();
+        
             if (addUserResponse.ok) {
-                alert("User registered successfully!");
-                document.getElementById('register-form').reset(); 
-                window.location.href = 'index.html'; 
+                // Automatically sign in after registration
+                const signInResponse = await fetch('/sign-in', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+        
+                const signInData = await signInResponse.json();
+        
+                if (signInResponse.ok && signInData.valid) {
+                    window.location.href = 'index.html';
+                } else {
+                    alert("Registration succeeded but sign-in failed.");
+                }
             } else {
                 alert(`Error: ${addUserData.error}`);
                 document.getElementById('register-form').reset(); 
             }
-        });
+        });        
     </script>
 </body>
 </html>

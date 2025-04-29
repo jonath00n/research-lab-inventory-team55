@@ -23,9 +23,10 @@
                     <li id="cart-icon-container" style="display: none;">
                         <div class="cart-icon" id="cart-icon">
                             <i class="fas fa-shopping-cart"></i>
+                            <span id="cart-count" style="display: none;">0</span>
                         </div>
-                        <span id="cart-count">0</span>
                     </li>
+
 
                     <!-- USER ICON -->
                     <li id="user-icon-container">
@@ -62,40 +63,6 @@
         <!-- SEARCH BAR -->
         <section class="search-bar-container" style="display: none;">
             <input type="text" class="search-bar" placeholder="⌕ Search">
-        </section>
-
-        <!-- LIST OF FILTERS -->
-        <section class="filter-container" style="display: none;">
-            <div class="filter">
-                <label for="equipment-type">Category:</label>
-                <select id="equipment-type" name="equipment-type">
-                    <option value="all">All</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Prototyping">Prototyping</option>
-                    <option value="Soldering">Soldering</option>
-                    <option value="Power Supplies">Power Supplies</option>
-                </select>
-            </div>
-            <div class="filter">
-                <label for="brand">Supplier:</label>
-                <select id="brand" name="brand">
-                    <option value="all">All</option>
-                    <option value="Electrical General">Electrical General</option>
-                    <option value="Tech Wizard">Tech Wizard</option>
-                    <option value="Prototype2Day">Prototype2Day</option>
-                    <option value="Super Solder">Super Solder</option>
-                    <option value="Power UP">Power UP</option>
-                </select>
-            </div>
-            <div class="filter">
-                <label for="availability">Availability:</label>
-                <select id="availability" name="availability">
-                    <option value="all">All</option>
-                    <option value="in-stock">In Stock</option>
-                    <option value="out-of-stock">Out of Stock</option>
-                    <option value="limited">Limited</option>
-                </select>
-            </div>
         </section>
 
         <!-- INFO & FAQ -->
@@ -137,49 +104,48 @@
         <button id="checkout-button" style="display: none; margin-top: 20px;">Checkout</button>
     </div>
 
-    <script>
+    <script>            
         // Fetch the current logged-in user
         async function fetchCurrentUser() {
             try {
                 const response = await fetch('/current-user');
-                if (response.ok) {
-                    const data = await response.json();
-                    const userName = data.user.name;
-                    const userColor = data.user.color;
-                    const userPermission = data.user.permission;
-                    const firstLetter = userName.charAt(0).toUpperCase();
-                    const cartItems = JSON.parse(data.user.cart || '[]');
-
-                    // Show the first letter of the user's name in the icon
-                    document.getElementById('user-icon').innerHTML = firstLetter;
-
-                    // Set the background color of the user icon
-                    document.getElementById('user-icon').style.backgroundColor = userColor;
-
-                    // Set cart size
-                    document.getElementById('cart-count').textContent = cartItems.length;
-
-                    // Show management option only for 'professor' or 'admin'
-                    if (userPermission === 'professor' || userPermission === 'admin') {
-                        document.getElementById('management-option').style.display = 'block';
-                    }
-
-                    // Hide Sign-in and Register, show Account and Sign-out options
+                if (!response.ok) throw new Error('Failed to fetch user');
+            
+                const data = await response.json();
+                console.log("User data:", data);
+            
+                if (data.user) {
+                    const { name, email, color, permission } = data.user;
+                    document.getElementById('user-icon').textContent = name.charAt(0).toUpperCase();
+                    document.getElementById('user-icon').style.backgroundColor = color;
+                
                     document.getElementById('sign-in-option').style.display = 'none';
                     document.getElementById('register-option').style.display = 'none';
                     document.getElementById('account-option').style.display = 'block';
                     document.getElementById('sign-out-option').style.display = 'block';
+                
+                    // Show management option for admin users
+                    if (permission === 'professor' || permission === 'admin') {
+                        document.getElementById('management-option').style.display = 'block';
+                    }
+                
                     document.getElementById('cart-icon-container').style.display = 'block';
-
-                    // Show the search bar and filter containers since the user is signed in
+                
+                    // Show search bar
                     document.querySelector('.search-bar-container').style.display = 'block';
-                    document.querySelector('.filter-container').style.display = 'block';
-
-                    // Get items for the user
+                
+                    // Hide the information section
+                    const infoSection = document.querySelector('.information');
+                    if (infoSection) {
+                        infoSection.style.display = 'none';
+                    }
+                
+                    // Fetch cart items from DB
+                    await loadCartItems();
                     fetchItems();
                 }
             } catch (error) {
-                console.error('Error fetching user:', error);
+                console.error("Error fetching user:", error);
             }
         }
 
@@ -190,111 +156,209 @@
         async function fetchItems() {
             try {
                 const response = await fetch('/items');
-                if (response.ok) {
-                    const data = await response.json();
-                    allItems = data.items;
-
-                    console.log('Items fetched from the server:', allItems);
-
-                    // Hide the information section
-                    const infoSection = document.querySelector('.information');
-                    if (infoSection) {
-                        infoSection.style.display = 'none';
-                    }
-
-                    renderTable(allItems);
-
-                    // Enable search and filter functionality
-                    enableSearchFilter();
-                    enableDropdownFilters();
-                }
+                if (!response.ok) throw new Error("Failed to fetch items");
+        
+                const data = await response.json();
+        
+                allItems = data.items;
+        
+                renderTable(allItems);
+                enableSearchFilter(); 
             } catch (error) {
-                console.error('Error fetching items:', error);
+                console.error("Error fetching items:", error);
             }
-        }
+        }        
 
         // Render the table based on the provided items
         function renderTable(items) {
             const existingTable = document.querySelector('.items-table');
             if (existingTable) existingTable.remove();
-
+        
             // Create the table
             const table = document.createElement('table');
             table.classList.add('items-table');
+        
+            // Table Header with Filter Dropdowns
             const thead = document.createElement('thead');
             thead.innerHTML = `
+                <button id="reset-filters-btn" style="padding: 5px 10px; border: 1px solid #ccc; background-color: #f8f8f8; cursor: pointer;">
+                    Reset Filters
+                </button>
                 <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Category</th>
+                    <th>
+                        Name 
+                    </th>
+                    <th>
+                        <select id="category-filter">
+                            <option value="all">Category</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select id="unit-filter">
+                            <option value="all">Unit</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select id="location-filter">
+                            <option value="all">Location</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select id="supplier-filter">
+                            <option value="all">Supplier</option>
+                        </select>
+                    </th>
                     <th>Quantity</th>
-                    <th>Unit</th>
-                    <th>Location</th>
-                    <th>Supplier</th>
                     <th>Add to Cart</th>
                 </tr>
             `;
             table.appendChild(thead);
-
+        
+            // Table Body
             const tbody = document.createElement('tbody');
             items.forEach(item => {
+        
+                if (!item.id || isNaN(item.id)) {
+                    console.error("Invalid item ID detected:", item);
+                    return;
+                }
+        
                 const row = document.createElement('tr');
-
-                // Check if item quantity is less than 1 and disable column
+        
                 if (item.quantity < 1) {
                     row.classList.add('disabled-row');
                     row.innerHTML = `
                         <td>${item.name}</td>
-                        <td>${item.description}</td>
-                        <td>${item.category}</td>
-                        <td>${item.quantity}</td>
+                        <td>${item.categoryID}</td>
                         <td>${item.unit}</td>
                         <td>${item.location}</td>
                         <td>${item.supplier}</td>
+                        <td>${item.quantity}</td>
                         <td>
                             <input type="number" class="quantity-input" value="0" disabled style="width: 60px;"/>
-                            <button class="add-to-cart-btn" data-item-id="${item.id}" disabled>Add to Cart</button>
+                            <button class="add-to-cart-btn" disabled>Add to Cart</button>
                         </td>
                     `;
                 } else {
                     row.innerHTML = `
                         <td>${item.name}</td>
-                        <td>${item.description}</td>
-                        <td>${item.category}</td>
-                        <td>${item.quantity}</td>
+                        <td>${item.categoryID}</td>
                         <td>${item.unit}</td>
                         <td>${item.location}</td>
                         <td>${item.supplier}</td>
+                        <td>${item.quantity}</td>
                         <td>
-                            <input type="number" class="quantity-input" value="1" min="1" max="${item.quantity}" style="width: 60px;"/>
+                            <input type="number" class="quantity-input" value="1" min="1" max="${item.quantity}" style="width: 60px;" 
+                                oninput="if(this.value > ${item.quantity}) this.value = ${item.quantity};"/>
                             <button class="add-to-cart-btn" data-item-id="${item.id}">Add to Cart</button>
                         </td>
                     `;
                 }
-
+        
                 tbody.appendChild(row);
             });
-
+        
             table.appendChild(tbody);
-            document.body.appendChild(table);
-
-            // Add event listeners to all Add to Cart buttons for items with quantity > 0
+            document.querySelector('.main-content').appendChild(table);
+        
+            // Populate and Enable Filters
+            populateFilterOptions(items);
+            enableTableFilters();
+        
+            // Attach event listeners to all "Add to Cart" buttons
             document.querySelectorAll('.add-to-cart-btn:not([disabled])').forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', async function () {
                     const itemId = this.getAttribute('data-item-id');
                     const quantityInput = this.previousElementSibling;
-                    const quantity = parseInt(quantityInput.value);
-
-                    if (quantity > 0) {
-                        addToCart(itemId, quantity);
+                    let quantity = quantityInput.value.trim();
+                
+                    if (!quantity || isNaN(quantity) || quantity <= 0) {
+                        console.error("Invalid quantity input:", quantity);
+                        return;
                     }
+        
+                    await addToCart(itemId, quantity);
                 });
             });
         }
 
+        // Reset filters button
+        function resetFilters() {
+            document.getElementById('category-filter').value = "all";
+            document.getElementById('unit-filter').value = "all";
+            document.getElementById('location-filter').value = "all";
+            document.getElementById('supplier-filter').value = "all";
+        
+            renderTable(allItems);
+        }
+
+        // Go through database and give options for select element
+        function populateFilterOptions(items) {
+            const categoryFilter = document.getElementById('category-filter');
+            const unitFilter = document.getElementById('unit-filter');
+            const locationFilter = document.getElementById('location-filter');
+            const supplierFilter = document.getElementById('supplier-filter');
+        
+            const uniqueCategories = new Set();
+            const uniqueUnits = new Set();
+            const uniqueLocations = new Set();
+            const uniqueSuppliers = new Set();
+        
+            items.forEach(item => {
+                uniqueCategories.add(item.categoryID);
+                uniqueUnits.add(item.unit);
+                uniqueLocations.add(item.location);
+                uniqueSuppliers.add(item.supplier);
+            });
+        
+            addOptionsToDropdown(categoryFilter, uniqueCategories);
+            addOptionsToDropdown(unitFilter, uniqueUnits);
+            addOptionsToDropdown(locationFilter, uniqueLocations);
+            addOptionsToDropdown(supplierFilter, uniqueSuppliers);
+        }
+        
+        // Add above filter options
+        function addOptionsToDropdown(dropdown, optionsSet) {
+            optionsSet.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                dropdown.appendChild(optionElement);
+            });
+        }    
+        
+        // Even listeners for filters
+        function enableTableFilters() {
+            document.getElementById('category-filter').addEventListener('change', filterTable);
+            document.getElementById('unit-filter').addEventListener('change', filterTable);
+            document.getElementById('location-filter').addEventListener('change', filterTable);
+            document.getElementById('supplier-filter').addEventListener('change', filterTable);
+            document.getElementById('reset-filters-btn').addEventListener('click', resetFilters);
+        }
+        
+        // Actually filtering the table
+        function filterTable() {
+            const selectedCategory = document.getElementById('category-filter').value;
+            const selectedUnit = document.getElementById('unit-filter').value;
+            const selectedLocation = document.getElementById('location-filter').value;
+            const selectedSupplier = document.getElementById('supplier-filter').value;
+        
+            const filteredItems = allItems.filter(item => {
+                return (selectedCategory === "all" || item.categoryID === selectedCategory) &&
+                       (selectedUnit === "all" || item.unit === selectedUnit) &&
+                       (selectedLocation === "all" || item.location === selectedLocation) &&
+                       (selectedSupplier === "all" || item.supplier === selectedSupplier);
+            });
+        
+            renderTable(filteredItems);
+        }        
+
         // Enable search filter functionality
         function enableSearchFilter() {
             const searchBar = document.querySelector('.search-bar');
+            
+            if (!searchBar) return;
+        
             searchBar.addEventListener('input', function () {
                 filterItems();
             });
@@ -312,85 +376,73 @@
         // Filter items based on search input and dropdown selections
         function filterItems() {
             const searchValue = document.querySelector('.search-bar').value.toLowerCase();
-            const selectedType = document.querySelector('#equipment-type').value;
-            const selectedBrand = document.querySelector('#brand').value;
-            const selectedAvailability = document.querySelector('#availability').value;
-
+            const selectedCategory = document.getElementById('category-filter').value;
+            const selectedUnit = document.getElementById('unit-filter').value;
+            const selectedLocation = document.getElementById('location-filter').value;
+            const selectedSupplier = document.getElementById('supplier-filter').value;
+        
             const filteredItems = allItems.filter(item => {
-                // Filter based on search bar
-                const matchesSearch = item.name.toLowerCase().includes(searchValue) ||
-                    item.description.toLowerCase().includes(searchValue);
-
-                // Filter based on equipment type
-                const matchesType = (selectedType === 'all' || item.category.toLowerCase() === selectedType.toLowerCase());
-
-                // Filter based on brand
-                const matchesBrand = (selectedBrand === 'all' || item.supplier.toLowerCase() === selectedBrand.toLowerCase());
-
-                // Filter based on availability (custom logic based on your data structure)
-                let matchesAvailability = true;
-                if (selectedAvailability !== 'all') {
-                    if (selectedAvailability === 'in-stock') {
-                        matchesAvailability = item.quantity > 0;
-                    } else if (selectedAvailability === 'out-of-stock') {
-                        matchesAvailability = item.quantity === 0;
-                    } else if (selectedAvailability === 'limited') {
-                        // if <= 10, then qualifies limited
-                        matchesAvailability = item.quantity > 0 && item.quantity <= 10;
-                    }
-                }
-
-                return matchesSearch && matchesType && matchesBrand && matchesAvailability;
+                const matchesSearch = item.name.toLowerCase().includes(searchValue);
+        
+                const matchesCategory = selectedCategory === "all" || item.categoryID === selectedCategory;
+                const matchesUnit = selectedUnit === "all" || item.unit === selectedUnit;
+                const matchesLocation = selectedLocation === "all" || item.location === selectedLocation;
+                const matchesSupplier = selectedSupplier === "all" || item.supplier === selectedSupplier;
+        
+                return matchesSearch && matchesCategory && matchesUnit && matchesLocation && matchesSupplier;
             });
-
-            // Render the filtered items in the table
+        
             renderTable(filteredItems);
-        }
+        }        
 
         // Add the selected item to the user's cart
         async function addToCart(itemId, quantity) {
-            try {
-                const response = await fetch('/current-user');
-                if (response.ok) {
-                    const data = await response.json();
-
-                    let cart = data.user.cart;
-                    console.log("Initial cart value:", cart);
-
-                    // Debugging logs
-                    if (!cart || cart === "[]") {
-                        cart = [];
-                        console.log("Cart initialized as empty array.");
-                    } else {
-                        try {
-                            cart = JSON.parse(cart);
-                            console.log("Parsed cart:", cart);
-                        } catch (e) {
-                            console.error("Error parsing cart:", e);
-                            cart = [];
-                        }
-                    }
-
-                    cart = Array.isArray(cart) ? cart : [];
-
-                    for (let i = 0; i < quantity; i++) {
-                        cart.push(parseInt(itemId));
-                    }
-
-                    console.log("Updated cart after adding item:", cart);
-
-                    // Set cart size
-                    document.getElementById('cart-count').textContent = cart.length;
-
-                    await updateCart(cart);
-
-                } else {
-                    alert("Error fetching the current cart.");
-                }
-            } catch (error) {
-                console.error('Error adding item to cart:', error);
+            if (!itemId || itemId === "0" || itemId === "" || itemId === null) {
+                console.error("Invalid item ID. Cannot add to cart.");
+                return;
             }
-        }
+        
+            quantity = parseInt(quantity);
+        
+            if (isNaN(quantity) || quantity <= 0) {
+                console.error("Invalid quantity detected:", quantity);
+                return;
+            }
+                
+            try {
+                const response = await fetch('/add-to-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item_id: parseInt(itemId), quantity: quantity })
+                });
+        
+                if (!response.ok) throw new Error('Error adding item to cart');
+        
+                loadCartItems();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }       
+        
+        // Remove the selected item from user's cart
+        async function removeFromCart(itemId) {
+            try {
+                const response = await fetch('/remove-from-cart', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ item_id: itemId })
+                });
+        
+                if (!response.ok) throw new Error('Failed to remove item');
+        
+                console.log("Item removed successfully");
+                await loadCartItems(); 
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }              
 
         // Update the cart in the database
         async function updateCart(cart) {
@@ -458,246 +510,235 @@
             document.body.classList.remove('modal-open');
         }
 
-        // Fetch the user's cart items and render them in the modal
         async function loadCartItems() {
             try {
-                const response = await fetch('/current-user');
-                if (response.ok) {
-                    const data = await response.json();
-                    const cartItems = JSON.parse(data.user.cart || '[]');
-
-                    document.getElementById('cart-count').textContent = cartItems.length;
-
-                    const cartItemsContainer = document.getElementById('cart-items');
-                    cartItemsContainer.innerHTML = '';
-
-                    let returnableItems = [];
-
-                    if (cartItems.length === 0) {
-                        cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
-                    } else {
-                        // Create an object to store the count of each item ID
-                        const itemCount = {};
-
-                        // Count occurrences of each item ID
-                        cartItems.forEach(itemId => {
-                            itemCount[itemId] = (itemCount[itemId] || 0) + 1;
-                        });
-
-                        // Loop through the unique items and render the name, count, and delete button
-                        for (const itemId in itemCount) {
-                            // Fetch the item details by ID
-                            const item = allItems.find(i => i.id === parseInt(itemId));
-                            if (item) {
-                                console.log('Item details:', item);
-
-                                const itemElement = document.createElement('div');
-                                itemElement.classList.add('cart-item');
-                                itemElement.style.display = 'flex';
-                                itemElement.style.justifyContent = 'space-between';
-                                itemElement.style.marginBottom = '10px';
-
-                                // Create the number input for quantity
-                                const quantityInput = document.createElement('input');
-                                quantityInput.type = 'number';
-                                quantityInput.value = itemCount[itemId];
-                                quantityInput.min = 0;
-                                quantityInput.max = item.quantity;
-                                quantityInput.style.width = '60px';
-
-                                // Listen for changes in the number input
-                                quantityInput.addEventListener('change', async function () {
-                                    const newQuantity = parseInt(quantityInput.value);
-
-                                    // Update the cart with the new quantity
-                                    updateCartItemQuantity(parseInt(itemId), newQuantity);
-                                });
-
-                                // Create the trash icon for deleting the item from the cart
-                                const trashIcon = document.createElement('i');
-                                trashIcon.classList.add('fas', 'fa-trash');
-                                trashIcon.style.cursor = 'pointer';
-                                trashIcon.style.color = '#ff0000';
-                                trashIcon.style.marginLeft = '10px';
-
-                                // Listen for clicks on the trash icon to remove all occurrences of the item
-                                trashIcon.addEventListener('click', async function () {
-                                    updateCartItemQuantity(parseInt(itemId), 0);
-                                });
-
-                                itemElement.innerHTML = `
-                                    <div class="cart-item-name"><strong>${item.name}</strong></div>
-                                `;
-
-                                const quantityContainer = document.createElement('div');
-                                quantityContainer.classList.add('cart-item-quantity');
-                                quantityContainer.style.display = 'flex';
-                                quantityContainer.style.alignItems = 'center';
-                                quantityContainer.appendChild(quantityInput);
-                                quantityContainer.appendChild(trashIcon);
-
-                                itemElement.appendChild(quantityContainer);
-                                cartItemsContainer.appendChild(itemElement);
-
-                                // Check if the item is returnable and add to array
-                                if (item.returnable) {
-                                    console.log(`${item.name} is returnable.`);
-                                    returnableItems.push(item.name);
-                                }
-                            }
-                        }
-                    }
-
-                    // Show the returnable agreement if there are returnable items
-                    if (returnableItems.length > 0) {
-                        const returnableAgreementDiv = document.getElementById('returnable-agreement');
-                        returnableAgreementDiv.style.display = 'block';
-
-                        const returnableLabel = document.getElementById('returnable-agreement-label');
-                        returnableLabel.innerHTML = `I agree that the following items must be returned in the same condition they were received: ${returnableItems.join(', ')}. Any responsibility for damage will be placed on me, the user. Agreement of this clause leaves all liability on myself and not LabRat.`;
-
-                        // Handle the checkout button visibility based on checkbox
-                        const returnableCheckbox = document.getElementById('returnable-checkbox');
-                        const checkoutButton = document.getElementById('checkout-button');
-
-                        // Hide/Display chackout button based on agreement
-                        returnableCheckbox.addEventListener('change', function () {
-                            if (returnableCheckbox.checked) {
-                                checkoutButton.style.display = 'block';
-                            } else {
-                                checkoutButton.style.display = 'none';
-                            }
-                        });
-                    } else {
-                        document.getElementById('returnable-agreement').style.display = 'none';
-                        document.getElementById('checkout-button').style.display = 'block';
-                    }
-
-                    // If the cart is empty, hide the checkout button
-                    if (cartItems.length === 0) {
-                        document.getElementById('checkout-button').style.display = 'none';
-                    }
+                const response = await fetch('/cart');
+                let cartItems = await response.json();
+        
+                if (!Array.isArray(cartItems)) {
+                    console.error("Invalid cart data:", cartItems);
+                    cartItems = [];
                 }
+                
+                const cartItemsContainer = document.getElementById('cart-items');
+                const checkoutButton = document.getElementById('checkout-button');
+                const returnableAgreement = document.getElementById('returnable-agreement');
+                const returnableCheckbox = document.getElementById('returnable-checkbox');
+                const returnableLabel = document.getElementById('returnable-agreement-label');
+                const cartCount = document.getElementById('cart-count');
+        
+                cartItemsContainer.innerHTML = '';
+        
+                if (cartItems.length === 0) {
+                    cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
+                    checkoutButton.style.display = 'none';
+                    returnableAgreement.style.display = 'none';
+                    cartCount.textContent = "0";
+                    cartCount.style.display = "block";
+                    return;
+                }
+        
+                let hasReturnableItems = false;
+                let totalCartQuantity = 0;
+        
+                for (const { item_id, item_name, quantity, returnable } of cartItems) {
+                    const stock_quantity = await getItemStock(item_id);
+                
+                    totalCartQuantity += quantity;
+                
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('cart-item');
+                
+                    const nameElement = document.createElement('span');
+                    nameElement.classList.add('cart-item-name');
+                    nameElement.textContent = item_name;
+                
+                    const quantityInput = document.createElement('input');
+                    quantityInput.type = 'number';
+                    quantityInput.value = quantity;
+                    quantityInput.min = 1;
+                    quantityInput.max = stock_quantity;
+                    quantityInput.classList.add('quantity-input');
+                    quantityInput.style.width = '60px';
+                    quantityInput.addEventListener('change', function () {
+                        let newQuantity = parseInt(this.value);
+                        if (newQuantity < 1) {
+                            removeFromCart(item_id);
+                        } else if (newQuantity > stock_quantity) {
+                            this.value = stock_quantity;
+                        } else {
+                            updateQuantity(item_id, newQuantity);
+                        }
+                    });
+                
+                    const removeButton = document.createElement('i');
+                    removeButton.classList.add('fas', 'fa-trash', 'remove-cart-item');
+                    removeButton.onclick = () => removeFromCart(item_id);
+                
+                    itemElement.appendChild(nameElement);
+                    itemElement.appendChild(quantityInput);
+                    itemElement.appendChild(removeButton);
+                    cartItemsContainer.appendChild(itemElement);
+                
+                    if (returnable) hasReturnableItems = true;
+                }
+                
+        
+                // Update the cart icon with total quantity
+                if (cartItems.length === 0 || totalCartQuantity < 1) {
+                    cartCount.textContent = "0";
+                    cartCount.style.display = "block"; 
+                } else {
+                    cartCount.textContent = totalCartQuantity;
+                    cartCount.style.display = 'block';
+                }
+                
+
+                // Display the returnable checkbox if any items are returnable
+                if (hasReturnableItems) {
+                    returnableAgreement.style.display = 'block';
+                    returnableLabel.innerText = "I hereby acknowledge that I am responsible for returning the borrowed items in good condition, and any damages to borrowed items will require compensation from me. Failure to do so may additionally result in penalties or restricted access to LabRat's services.";
+                    returnableCheckbox.checked = false;
+                    checkoutButton.style.display = 'none'; 
+        
+                    // Enable checkout when checkbox is checked
+                    returnableCheckbox.addEventListener('change', function () {
+                        checkoutButton.style.display = this.checked ? 'block' : 'none';
+                    });
+                } else {
+                    returnableAgreement.style.display = 'none';
+                    checkoutButton.style.display = 'block';
+                }
+        
             } catch (error) {
-                console.error('Error loading cart items:', error);
+                console.error("Error loading cart:", error);
             }
         }
 
-        // Update the quantity of a specific item in the cart
-        async function updateCartItemQuantity(itemId, newQuantity) {
+        async function getItemStock(itemId) {
             try {
-                const response = await fetch('/current-user');
-                if (response.ok) {
-                    const data = await response.json();
-                    let cart = JSON.parse(data.user.cart);
-
-                    // Remove all occurrences of the itemId from the cart
-                    cart = cart.filter(id => id !== itemId);
-
-                    // Add the item back in with the new quantity, if greater than 0
-                    if (newQuantity > 0) {
-                        for (let i = 0; i < newQuantity; i++) {
-                            cart.push(itemId);
-                        }
-                    }
-
-                    await updateCart(cart);
-                    loadCartItems();
-                }
+                const response = await fetch('/items');
+                const data = await response.json();
+                const match = data.items.find(item => item.id == itemId);
+                return match ? match.quantity : 0;
             } catch (error) {
-                console.error('Error updating cart item quantity:', error);
+                console.error("Failed to fetch item stock:", error);
+                return 0;
             }
         }
+        
+
+        // Update quantity when changed in cart modal
+        async function updateQuantity(itemId, newQuantity) {
+            if (newQuantity < 1) {
+                await removeFromCart(itemId);
+                await loadCartItems();  
+                return;
+            }
+            
+        
+            try {
+                const response = await fetch('/update-cart', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ item_id: itemId, quantity: newQuantity })
+                });
+        
+                if (!response.ok) throw new Error('Failed to update cart');
+        
+                await loadCartItems();
+            } catch (error) {
+                console.error("Error updating cart:", error);
+            }
+        }
+        
 
         // Function to place the order, adjust item quantities, and clear the cart
         async function checkout() {
             try {
                 const response = await fetch('/current-user');
-                if (response.ok) {
-                    const data = await response.json();
-                    const userName = data.user.name;
-                    const userEmail = data.user.email;
-                    const cartItems = JSON.parse(data.user.cart || '[]');
-
-                    // Initialize itemsToReturn array
-                    let itemsToReturn = JSON.parse(data.user.items_to_return || '[]');
-
-                    if (cartItems.length > 0) {
-                        // Create an object to store the count of each item ID in the cart
-                        const itemCount = {};
-
-                        // Count occurrences of each item ID in the cart
-                        cartItems.forEach(itemId => {
-                            itemCount[itemId] = (itemCount[itemId] || 0) + 1;
-                        });
-
-                        // Loop through each unique item in the cart and process the order
-                        for (const itemId in itemCount) {
-                            const item = allItems.find(i => i.id === parseInt(itemId));
-                            const quantityOrdered = itemCount[itemId];
-
-                            if (item) {
-                                // Add the order to the orders table with quantity
-                                await fetch('/add-order', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        user_name: userName,
-                                        user_email: userEmail,
-                                        item_id: itemId,
-                                        item_name: item.name,
-                                        returnable: item.returnable,
-                                        quantity: quantityOrdered
-                                    })
-                                });
-
-                                // Update the item quantity on the server
-                                const newQuantity = item.quantity - quantityOrdered;
-                                await fetch(`/update-item-quantity/${itemId}`, {
-                                    method: 'PUT',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ quantity: newQuantity })
-                                });
-
-                                // Add or update item in itemsToReturn array if it's returnable
-                                if (item.returnable) {
-                                    const existingItem = itemsToReturn.find(i => i.name === item.name);
-                                    if (existingItem) {
-                                        // Update the quantity if the item already exists
-                                        existingItem.quantity += quantityOrdered;
-                                    } else {
-                                        // Add as a new item if it doesn't exist
-                                        itemsToReturn.push({ name: item.name, quantity: quantityOrdered });
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // After processing the orders, clear the cart
-                    await updateCart([]);
-
-                    // Update items_to_return on the server
-                    await fetch('/update-items-to-return', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ email: userEmail, itemsToReturn: JSON.stringify(itemsToReturn) })
-                    });
-
-                    closeCartModal();
-                    loadCartItems();
-                    fetchItems();
+                if (!response.ok) throw new Error("Failed to get user data");
+        
+                const data = await response.json();
+                const userName = data.user.name;
+                const userEmail = data.user.email;
+        
+                const cartResponse = await fetch('/cart');
+                const cartItems = await cartResponse.json();
+        
+                if (!Array.isArray(cartItems) || cartItems.length === 0) {
+                    console.error("Cart is empty.");
+                    return;
                 }
+        
+                for (const { item_id, item_name, returnable, quantity } of cartItems) {
+                    if (!item_name) {
+                        console.error("Missing item_name for item_id:", item_id);
+                        continue; 
+                    }
+        
+                    console.log(`Processing Order: ${item_name} (ID: ${item_id}) - Quantity: ${quantity}`);
+        
+                    // Push to orders table
+                    await fetch('/add-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_name: userName,
+                            user_email: userEmail,
+                            item_id,
+                            item_name,
+                            returnable,
+                            quantity
+                        })
+                    });
+        
+                    // If returnable, push to returns table
+                    if (returnable) {
+                        await fetch('/add-return', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: userEmail,
+                                item_id,
+                                item_name, 
+                                quantity
+                            })
+                        });
+                    }
+        
+                    // Update item stock
+                    await fetch(`/update-item-quantity/${item_id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ quantity: -quantity })
+                    });
+                }
+        
+                // Clear cart
+                await fetch('/clear-cart', { method: 'DELETE' });
+        
+                closeCartModal();
+                loadCartItems();
+                fetchItems();
             } catch (error) {
-                console.error('Error during checkout:', error);
+                console.error("Error during checkout:", error);
             }
         }
+        
+        
+
+        // Event listener for agreement
+        document.getElementById('returnable-checkbox').addEventListener('change', function () {
+            const checkoutButton = document.getElementById('checkout-button');
+            if (this.checked) {
+                checkoutButton.style.display = 'block';
+            } else {
+                checkoutButton.style.display = 'none';
+            }
+        });        
 
         // Event listener to the checkout button
         document.getElementById('checkout-button').addEventListener('click', function () {
@@ -712,6 +753,10 @@
 
         // Clicking X in cart
         document.querySelector('.close-cart').addEventListener('click', closeCartModal);
+
+        // Search bar event listener
+        document.querySelector('.search-bar').addEventListener('input', filterItems);
+
 
         // Clicking outside of cart
         document.addEventListener('click', function (event) {
